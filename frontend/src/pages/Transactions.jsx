@@ -45,10 +45,6 @@ export default function Transactions() {
   const [showFilters, setShowFilters] = useState(false)
 
   const allCategories = useMemo(() => categories.map(c => c.name), [categories])
-  const categoryOptions = useMemo(
-    () => categories.filter(c => c.type === form.type).map(c => c.name),
-    [categories, form.type]
-  )
   const walletNames = useMemo(() => wallets.map(w => w.name), [wallets])
   const subcategoryList = useMemo(() => {
     const set = new Set()
@@ -63,6 +59,11 @@ export default function Transactions() {
     date: todayStr, type: 'expense', note: '', memo: '', category: firstExpenseCat,
     subcategory: '', amount: '', wallet: firstWallet, transferWallet: secondWallet,
   })
+
+  const categoryOptions = useMemo(
+    () => categories.filter(c => c.type === form.type).map(c => c.name),
+    [categories, form.type]
+  )
 
   // Update form defaults when data loads
   useEffect(() => {
