@@ -19,6 +19,25 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+const AUTH_USER = process.env.AUTH_USER || ''
+const AUTH_PASS = process.env.AUTH_PASS || ''
+if (AUTH_USER && AUTH_PASS) {
+  app.use((req, res, next) => {
+    const auth = req.headers.authorization
+    if (!auth || !auth.startsWith('Basic ')) {
+      res.setHeader('WWW-Authenticate', 'Basic realm="Finance Monitor"')
+      return res.status(401).end()
+    }
+    const buf = Buffer.from(auth.slice(6), 'base64').toString()
+    const [user, pass] = buf.split(':')
+    if (user !== AUTH_USER || pass !== AUTH_PASS) {
+      res.setHeader('WWW-Authenticate', 'Basic realm="Finance Monitor"')
+      return res.status(401).end()
+    }
+    next()
+  })
+}
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
