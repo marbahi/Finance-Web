@@ -88,7 +88,7 @@ router.post('/', (req, res) => {
 
   const info = db.prepare(`INSERT INTO trans (note, memo, type, amount, date_time, account_id, fee_id,
     category_id, subcategory_id, wallet_id, transfer_wallet_id, trans_amount, debt_id, debt_trans_id, budget_id)
-    VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, 0, 0, 0, ?)`).run(
+    VALUES (?, ?, ?, ?, ?, 1, 0, ?, ?, ?, ?, ?, 0, 0, ?)`).run(
     note || '', memo || '', Number(typeNum), dbAmount, dateTime,
     cat ? cat.id : 0, sub ? sub.id : 0, w ? w.id : 0,
     tw ? tw.id : -1, typeNum === 2 ? Math.abs(Number(amount)) : 0,
