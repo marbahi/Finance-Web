@@ -83,19 +83,22 @@ export function DummyProvider({ children }) {
   const createTransaction = useCallback(async (data) => {
     const created = await transactionsApi.create(data)
     setTransactions(prev => [created, ...prev])
+    await refreshEntity('wallets')
     return created
-  }, [])
+  }, [refreshEntity])
 
   const updateTransaction = useCallback(async (id, data) => {
     const updated = await transactionsApi.update(id, data)
     setTransactions(prev => prev.map(t => t.id === id ? updated : t))
+    await refreshEntity('wallets')
     return updated
-  }, [])
+  }, [refreshEntity])
 
   const deleteTransaction = useCallback(async (id) => {
     await transactionsApi.delete(id)
     setTransactions(prev => prev.filter(t => t.id !== id))
-  }, [])
+    await refreshEntity('wallets')
+  }, [refreshEntity])
 
   const createWallet = useCallback(async (data) => {
     const created = await walletsApi.create(data)
