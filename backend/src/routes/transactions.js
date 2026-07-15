@@ -72,6 +72,21 @@ router.get('/:id', (req, res) => {
   res.json(transform(row))
 })
 
+function updateWalletBalance(typeNum, amountCents, walletId, transferWalletId, direction) {
+  const absAmount = Math.abs(amountCents)
+  const mult = direction === 'reverse' ? -1 : 1
+  if (Number(typeNum) === 1) {
+    db.prepare('UPDATE wallet SET amount = amount - ? * ? WHERE id = ?').run(absAmount, mult, walletId)
+  } else if (Number(typeNum) === 0) {
+    db.prepare('UPDATE wallet SET amount = amount + ? * ? WHERE id = ?').run(absAmount, mult, walletId)
+  } else if (Number(typeNum) === 2) {
+    db.prepare('UPDATE wallet SET amount = amount - ? * ? WHERE id = ?').run(absAmount, mult, walletId)
+    if (transferWalletId > 0) {
+      db.prepare('UPDATE wallet SET amount = amount + ? * ? WHERE id = ?').run(absAmount, mult, transferWalletId)
+    }
+  }
+}
+
 router.post('/', (req, res) => {
   const { date, note, memo, type, amount, category, subcategory, wallet, transferWallet } = req.body
 
@@ -95,6 +110,8 @@ router.post('/', (req, res) => {
     req.body.budget_id || null
   )
 
+  updateWalletBalance(typeNum, dbAmount, w ? w.id : 0, tw ? tw.id : -1, 'apply')
+
   const row = db.prepare('SELECT * FROM trans WHERE id = ?').get(info.lastInsertRowid)
   res.status(201).json(transform(row))
 })
@@ -102,6 +119,8 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const existing = db.prepare('SELECT * FROM trans WHERE id = ?').get(req.params.id)
   if (!existing) return res.status(404).json({ error: 'Transaction not found' })
+
+  updateWalletBalance(existing.type, existing.amount, existing.wallet_id, existing.transfer_wallet_id, 'reverse')
 
   const { date, note, memo, type, amount, category, subcategory, wallet, transferWallet } = req.body
 
@@ -131,11 +150,16 @@ router.put('/:id', (req, res) => {
     req.params.id
   )
 
+  updateWalletBalance(typeNum, dbAmount, w ? w.id : existing.wallet_id, tw ? tw.id : existing.transfer_wallet_id, 'apply')
+
   const row = db.prepare('SELECT * FROM trans WHERE id = ?').get(req.params.id)
   res.json(transform(row))
 })
 
 router.delete('/:id', (req, res) => {
+  const t = db.prepare('SELECT * FROM trans WHERE id = ?').get(req.params.id)
+  if (!t) return res.status(404).json({ error: 'Transaction not found' })
+  updateWalletBalance(t.type, t.amount, t.wallet_id, t.transfer_wallet_id, 'reverse')
   db.prepare('DELETE FROM trans WHERE id = ?').run(req.params.id)
   res.json({ success: true })
 })
