@@ -1,0 +1,8 @@
+node_modules/
+frontend/dist/
+backend/finance.db-wal
+backend/finance.db-shm
+.env
+.env.local
+.DS_Store
+Thumbs.db
