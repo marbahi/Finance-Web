@@ -111,7 +111,7 @@ router.post('/', async (req, res) => {
   const dbAmount = (typeNum === 1 ? -1 : 1) * Math.abs(Number(amount) || 0) * 100
   const dateTime = date ? new Date(date + 'T00:00:00').getTime() : Date.now()
 
-  const { data } = await supabase.from('trans').insert({
+  const { data, error } = await supabase.from('trans').insert({
     note: note || '',
     memo: memo || '',
     type: Number(typeNum),
@@ -128,6 +128,11 @@ router.post('/', async (req, res) => {
     debt_trans_id: 0,
     budget_id: req.body.budget_id || null,
   }).select().single()
+
+  if (error || !data) {
+    console.error('Supabase insert error:', error?.message || JSON.stringify(error), 'body:', req.body)
+    return res.status(500).json({ error: error?.message || 'Insert returned no data' })
+  }
 
   await updateWalletBalance(typeNum, dbAmount, walletId, twId, 'apply')
 
@@ -165,7 +170,7 @@ router.put('/:id', async (req, res) => {
   const subId = sub.data !== null ? (sub.data.length > 0 ? sub.data[0].id : 0) : existing.subcategory_id
   const twId = tw.data !== null ? (tw.data.length > 0 ? tw.data[0].id : -1) : existing.transfer_wallet_id
 
-  await supabase.from('trans').update({
+  const { error: updateError } = await supabase.from('trans').update({
     note: note ?? existing.note,
     memo: memo ?? existing.memo,
     type: Number(typeNum),
@@ -177,9 +182,17 @@ router.put('/:id', async (req, res) => {
     transfer_wallet_id: twId,
   }).eq('id', req.params.id)
 
+  if (updateError) {
+    console.error('Supabase update error:', updateError.message)
+    return res.status(500).json({ error: updateError.message })
+  }
+
   await updateWalletBalance(typeNum, dbAmount, wId, twId, 'apply')
 
-  const { data: updated } = await supabase.from('trans').select('*').eq('id', req.params.id)
+  const { data: updated, error: selectError } = await supabase.from('trans').select('*').eq('id', req.params.id)
+  if (selectError || !updated || updated.length === 0) {
+    return res.status(500).json({ error: selectError?.message || 'Transaction not found after update' })
+  }
   res.json(await transform(updated[0]))
 })
 

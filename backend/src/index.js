@@ -1,3 +1,4 @@
+import 'express-async-errors'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import express from 'express';
@@ -55,6 +56,11 @@ const frontendDist = join(__dirname, '../../frontend/dist')
 app.use(express.static(frontendDist))
 app.get('*', (req, res) => {
   res.sendFile(join(frontendDist, 'index.html'))
+})
+
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err)
+  res.status(500).json({ error: err.message || 'Internal server error' })
 })
 
 if (!process.env.VERCEL) {
