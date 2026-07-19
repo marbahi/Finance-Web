@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { DummyProvider } from './data/DummyContext'
+import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
+import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Transactions from './pages/Transactions'
 import Wallets from './pages/Wallets'
@@ -16,23 +18,28 @@ import Settings from './pages/Settings'
 export default function App() {
   return (
     <BrowserRouter>
-      <DummyProvider>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="transactions" element={<Transactions />} />
-            <Route path="wallets" element={<Wallets />} />
-            <Route path="categories" element={<Categories />} />
-            <Route path="budgets" element={<Budgets />} />
-            <Route path="debts" element={<Debts />} />
-            <Route path="goals" element={<Goals />} />
-            <Route path="recurring" element={<Recurring />} />
-            <Route path="templates" element={<Templates />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-        </Routes>
-      </DummyProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DummyProvider>
+              <Layout />
+            </DummyProvider>
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="transactions" element={<Transactions />} />
+          <Route path="wallets" element={<Wallets />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="budgets" element={<Budgets />} />
+          <Route path="debts" element={<Debts />} />
+          <Route path="goals" element={<Goals />} />
+          <Route path="recurring" element={<Recurring />} />
+          <Route path="templates" element={<Templates />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   )
 }

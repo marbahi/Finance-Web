@@ -1,10 +1,22 @@
 const BASE = '/api'
 
 async function request(url, options = {}) {
+  const token = localStorage.getItem('finance_token')
+  const headers = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
   const res = await fetch(`${BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   })
+
+  if (res.status === 401) {
+    localStorage.removeItem('finance_token')
+    localStorage.removeItem('finance_user')
+    window.location.href = '/login'
+    throw new Error('Session expired')
+  }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }))
     throw new Error(err.error || `HTTP ${res.status}`)
