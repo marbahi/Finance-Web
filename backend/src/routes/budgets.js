@@ -1,13 +1,17 @@
 import { Router } from 'express'
-import db from '../db.js'
+import supabase from '../supabase.js'
 
 const router = Router()
 
-function transform(b) {
-  const cat = b.category_id ? db.prepare('SELECT name FROM category WHERE id = ?').get(b.category_id) : null
+async function transform(b) {
+  let catName = ''
+  if (b.category_id) {
+    const { data: cat } = await supabase.from('category').select('name').eq('id', b.category_id)
+    if (cat && cat.length > 0) catName = cat[0].name
+  }
   return {
     id: b.id,
-    category: cat ? cat.name : '',
+    category: catName,
     category_id: b.category_id,
     amount: b.amount / 100,
     spent: (b.spent || 0) / 100,
@@ -18,17 +22,28 @@ function transform(b) {
   }
 }
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   let rows
   if (req.query.month && req.query.year) {
     const period = Number(req.query.year) * 100 + Number(req.query.month)
-    rows = db.prepare('SELECT * FROM user_budget WHERE target_date = ?').all(period)
+    const { data: userBudgets } = await supabase
+      .from('user_budget')
+      .select('*')
+      .eq('target_date', period)
+    rows = userBudgets || []
 
-    const budgetRows = db.prepare('SELECT * FROM budget WHERE period = ?').all(period)
+    const { data: budgetRows } = await supabase
+      .from('budget')
+      .select('*')
+      .eq('period', period)
+
     const budgetMap = {}
-    for (const br of budgetRows) {
-      const cat = db.prepare('SELECT name, type FROM category WHERE id = ?').get(br.category_id)
-      if (cat && cat.type === 2) {
+    for (const br of budgetRows || []) {
+      const { data: cat } = await supabase
+        .from('category')
+        .select('name, type')
+        .eq('id', br.category_id)
+      if (cat && cat.length > 0 && cat[0].type === 2) {
         const key = br.category_id
         budgetMap[key] = (budgetMap[key] || 0) + br.amount
       }
@@ -40,77 +55,89 @@ router.get('/', (req, res) => {
       }
     }
   } else {
-    rows = db.prepare('SELECT * FROM user_budget ORDER BY id').all()
+    const { data } = await supabase.from('user_budget').select('*').order('id')
+    rows = data || []
   }
 
-  const result = rows.map(transform)
+  const result = await Promise.all(rows.map(r => transform(r)))
 
   for (const r of result) {
     if (r.year && r.month) {
       const start = new Date(r.year, r.month - 1, 1).getTime()
       const end = new Date(r.year, r.month, 0, 23, 59, 59).getTime()
-      const spentRow = db.prepare(
-        'SELECT COALESCE(SUM(ABS(amount)), 0) AS total FROM trans WHERE category_id = ? AND type = 1 AND date_time >= ? AND date_time <= ?'
-      ).get(r.category_id, start, end)
-      r.spent = spentRow.total / 100
+      const { data: spentRows } = await supabase
+        .from('trans')
+        .select('amount')
+        .eq('category_id', r.category_id)
+        .eq('type', 1)
+        .gte('date_time', start)
+        .lte('date_time', end)
+      let total = 0
+      for (const s of spentRows || []) {
+        total += Math.abs(s.amount)
+      }
+      r.spent = total / 100
     }
   }
 
   res.json(result)
 })
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM user_budget WHERE id = ?').get(req.params.id)
-  if (!row) return res.status(404).json({ error: 'Budget not found' })
-  res.json(transform(row))
+router.get('/:id', async (req, res) => {
+  const { data } = await supabase.from('user_budget').select('*').eq('id', req.params.id)
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Budget not found' })
+  res.json(await transform(data[0]))
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { category, amount, month, year, note } = req.body
   let catId
   if (req.body.category_id) {
     catId = req.body.category_id
   } else {
-    const cat = db.prepare('SELECT id FROM category WHERE name = ?').get(category)
-    catId = cat ? cat.id : 0
+    const { data: cat } = await supabase.from('category').select('id').eq('name', category)
+    catId = cat && cat.length > 0 ? cat[0].id : 0
   }
   const targetDate = year * 100 + month
 
-  const info = db.prepare(`INSERT INTO user_budget (category_id, amount, note, target_date)
-    VALUES (?, ?, ?, ?)`).run(
-    catId, (Number(amount) || 0) * 100, note || '', targetDate
-  )
+  const { data } = await supabase.from('user_budget').insert({
+    category_id: catId,
+    amount: (Number(amount) || 0) * 100,
+    note: note || '',
+    target_date: targetDate,
+  }).select().single()
 
-  const row = db.prepare('SELECT * FROM user_budget WHERE id = ?').get(info.lastInsertRowid)
-  res.status(201).json(transform(row))
+  res.status(201).json(await transform(data))
 })
 
-router.put('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM user_budget WHERE id = ?').get(req.params.id)
-  if (!existing) return res.status(404).json({ error: 'Budget not found' })
+router.put('/:id', async (req, res) => {
+  const { data: existing } = await supabase.from('user_budget').select('*').eq('id', req.params.id)
+  if (!existing || existing.length === 0) return res.status(404).json({ error: 'Budget not found' })
+  const e = existing[0]
 
   const { category, amount, month, year, note } = req.body
 
   const catId = req.body.category_id !== undefined
     ? Number(req.body.category_id)
     : (category
-      ? (db.prepare('SELECT id FROM category WHERE name = ?').get(category)?.id ?? existing.category_id)
-      : existing.category_id)
+      ? (await supabase.from('category').select('id').eq('name', category)).data?.[0]?.id ?? e.category_id
+      : e.category_id)
 
-  const targetDate = (year !== undefined ? Number(year) : Math.floor(existing.target_date / 100)) * 100
-    + (month !== undefined ? Number(month) : (existing.target_date % 100))
+  const targetDate = (year !== undefined ? Number(year) : Math.floor(e.target_date / 100)) * 100
+    + (month !== undefined ? Number(month) : (e.target_date % 100))
 
-  db.prepare('UPDATE user_budget SET category_id=?, amount=?, note=?, target_date=? WHERE id=?').run(
-    catId, amount !== undefined ? Number(amount) * 100 : existing.amount,
-    note ?? existing.note, targetDate, req.params.id
-  )
+  const { data } = await supabase.from('user_budget').update({
+    category_id: catId,
+    amount: amount !== undefined ? Number(amount) * 100 : e.amount,
+    note: note ?? e.note,
+    target_date: targetDate,
+  }).eq('id', req.params.id).select().single()
 
-  const row = db.prepare('SELECT * FROM user_budget WHERE id = ?').get(req.params.id)
-  res.json(transform(row))
+  res.json(await transform(data))
 })
 
-router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM user_budget WHERE id = ?').run(req.params.id)
+router.delete('/:id', async (req, res) => {
+  await supabase.from('user_budget').delete().eq('id', req.params.id)
   res.json({ success: true })
 })
 

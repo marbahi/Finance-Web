@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import db from '../db.js'
+import supabase from '../supabase.js'
 
 const router = Router()
 
@@ -20,88 +20,113 @@ function transform(g) {
   }
 }
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM goal ORDER BY id').all()
-  res.json(rows.map(transform))
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('goal').select('*').order('id')
+  res.json((data || []).map(transform))
 })
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM goal WHERE id = ?').get(req.params.id)
-  if (!row) return res.status(404).json({ error: 'Goal not found' })
-  res.json(transform(row))
+router.get('/:id', async (req, res) => {
+  const { data } = await supabase.from('goal').select('*').eq('id', req.params.id)
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Goal not found' })
+  res.json(transform(data[0]))
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, icon, target, current, deadline, color } = req.body
-  const iconNum = icon ? GOAL_ICONS.indexOf(icon) : -1
 
-  const info = db.prepare(`INSERT INTO goal (name, color, saved, amount, status, account_id, expect_date, currency)
-    VALUES (?, ?, ?, ?, 0, 1, ?, 'IDR')`).run(
-    name || '', color || '#2563eb',
-    (Number(current) || 0) * 100, (Number(target) || 0) * 100,
-    deadline ? new Date(deadline).getTime() : 0
-  )
+  const { data } = await supabase.from('goal').insert({
+    name: name || '',
+    color: color || '#2563eb',
+    saved: (Number(current) || 0) * 100,
+    amount: (Number(target) || 0) * 100,
+    status: 0,
+    account_id: 1,
+    expect_date: deadline ? new Date(deadline).getTime() : 0,
+    currency: 'IDR',
+  }).select().single()
 
-  const row = db.prepare('SELECT * FROM goal WHERE id = ?').get(info.lastInsertRowid)
-  res.status(201).json(transform(row))
+  res.status(201).json(transform(data))
 })
 
-router.put('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM goal WHERE id = ?').get(req.params.id)
-  if (!existing) return res.status(404).json({ error: 'Goal not found' })
+router.put('/:id', async (req, res) => {
+  const { data: existing } = await supabase.from('goal').select('*').eq('id', req.params.id)
+  if (!existing || existing.length === 0) return res.status(404).json({ error: 'Goal not found' })
+  const e = existing[0]
 
   const { name, icon, target, current, deadline, color, status } = req.body
 
-  db.prepare(`UPDATE goal SET name=?, color=?, saved=?, amount=?, status=?, expect_date=? WHERE id=?`).run(
-    name ?? existing.name,
-    color ?? existing.color,
-    current !== undefined ? Number(current) * 100 : existing.saved,
-    target !== undefined ? Number(target) * 100 : existing.amount,
-    status !== undefined ? (status === 'achieved' ? 1 : 0) : existing.status,
-    deadline !== undefined ? (deadline ? new Date(deadline).getTime() : 0) : existing.expect_date,
-    req.params.id
-  )
+  const { data } = await supabase.from('goal').update({
+    name: name ?? e.name,
+    color: color ?? e.color,
+    saved: current !== undefined ? Number(current) * 100 : e.saved,
+    amount: target !== undefined ? Number(target) * 100 : e.amount,
+    status: status !== undefined ? (status === 'achieved' ? 1 : 0) : e.status,
+    expect_date: deadline !== undefined ? (deadline ? new Date(deadline).getTime() : 0) : e.expect_date,
+  }).eq('id', req.params.id).select().single()
 
-  const row = db.prepare('SELECT * FROM goal WHERE id = ?').get(req.params.id)
-  res.json(transform(row))
+  res.json(transform(data))
 })
 
-router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM goalTrans WHERE goal_id = ?').run(req.params.id)
-  db.prepare('DELETE FROM goal WHERE id = ?').run(req.params.id)
+router.delete('/:id', async (req, res) => {
+  await supabase.from('goaltrans').delete().eq('goal_id', req.params.id)
+  await supabase.from('goal').delete().eq('id', req.params.id)
   res.json({ success: true })
 })
 
-router.post('/:id/fund', (req, res) => {
-  const goal = db.prepare('SELECT * FROM goal WHERE id = ?').get(req.params.id)
-  if (!goal) return res.status(404).json({ error: 'Goal not found' })
+router.post('/:id/fund', async (req, res) => {
+  const { data: goalArr } = await supabase.from('goal').select('*').eq('id', req.params.id)
+  if (!goalArr || goalArr.length === 0) return res.status(404).json({ error: 'Goal not found' })
+  const goal = goalArr[0]
 
   const { wallet, amount, date } = req.body
-  const w = db.prepare('SELECT id, amount FROM wallet WHERE name = ?').get(wallet)
-  if (!w) return res.status(400).json({ error: 'Wallet not found' })
+  const { data: wData } = await supabase.from('wallet').select('id, amount').eq('name', wallet)
+  if (!wData || wData.length === 0) return res.status(400).json({ error: 'Wallet not found' })
+  const w = wData[0]
 
   const fundAmount = (Number(amount) || 0) * 100
   const dateTime = date ? new Date(date + 'T00:00:00').getTime() : Date.now()
 
-  db.prepare('UPDATE goal SET saved = saved + ? WHERE id = ?').run(fundAmount, req.params.id)
-  db.prepare('INSERT INTO goalTrans (amount, date_time, goal_id, type, note) VALUES (?, ?, ?, 1, ?)').run(
-    fundAmount, dateTime, req.params.id, `Dana target: ${goal.name}`
-  )
+  const { data: currentGoal } = await supabase.from('goal').select('saved').eq('id', req.params.id).single()
+  await supabase.from('goal').update({
+    saved: (currentGoal?.saved || 0) + fundAmount
+  }).eq('id', req.params.id)
 
-  db.prepare('UPDATE wallet SET amount = amount - ? WHERE id = ?').run(fundAmount, w.id)
+  await supabase.from('goaltrans').insert({
+    amount: fundAmount,
+    date_time: dateTime,
+    goal_id: req.params.id,
+    type: 1,
+    note: `Dana target: ${goal.name}`,
+  })
 
-  const cat = db.prepare("SELECT id FROM category WHERE name = 'Investasi' AND type = 2").get() ||
-              db.prepare('SELECT id FROM category WHERE type = 2 LIMIT 1').get()
+  await supabase.rpc('update_wallet_balance', { wallet_id: w.id, delta: -fundAmount })
 
-  db.prepare(`INSERT INTO trans (note, memo, type, amount, date_time, account_id, fee_id,
-    category_id, subcategory_id, wallet_id, transfer_wallet_id, trans_amount, debt_id, debt_trans_id, budget_id)
-    VALUES (?, ?, 1, ?, ?, 1, 0, ?, 0, ?, -1, 0, 0, 0, ?)`).run(
-    `Dana target: ${goal.name}`, '', -fundAmount, dateTime,
-    cat ? cat.id : 0, w.id, req.body.budget_id || null
-  )
+  const { data: catData } = await supabase.from('category').select('id')
+    .eq('name', 'Investasi')
+    .eq('type', 2)
+  const cat = catData && catData.length > 0 ? catData[0]
+    : (await supabase.from('category').select('id').eq('type', 2).limit(1)).data?.[0]
 
-  const updated = db.prepare('SELECT * FROM goal WHERE id = ?').get(req.params.id)
-  res.json(transform(updated))
+  await supabase.from('trans').insert({
+    note: `Dana target: ${goal.name}`,
+    memo: '',
+    type: 1,
+    amount: -fundAmount,
+    date_time: dateTime,
+    account_id: 1,
+    fee_id: 0,
+    category_id: cat ? cat.id : 0,
+    subcategory_id: 0,
+    wallet_id: w.id,
+    transfer_wallet_id: -1,
+    trans_amount: 0,
+    debt_id: 0,
+    debt_trans_id: 0,
+    budget_id: req.body.budget_id || null,
+  })
+
+  const { data: updated } = await supabase.from('goal').select('*').eq('id', req.params.id)
+  res.json(transform(updated[0]))
 })
 
 export default router

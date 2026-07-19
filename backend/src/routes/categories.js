@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import db from '../db.js'
+import supabase from '../supabase.js'
 
 const router = Router()
 
@@ -10,8 +10,12 @@ const CAT_ICONS = [
   'Lightbulb', 'MusicNote', 'PiggyBank'
 ]
 
-function transform(cat) {
-  const subcategories = db.prepare('SELECT * FROM subcategory WHERE category_id = ? ORDER BY ordering').all(cat.id)
+async function transform(cat) {
+  const { data: subcategories } = await supabase
+    .from('subcategory')
+    .select('name')
+    .eq('category_id', cat.id)
+    .order('ordering')
   return {
     id: cat.id,
     name: cat.name,
@@ -19,73 +23,93 @@ function transform(cat) {
     color: cat.color || '#78716c',
     icon: CAT_ICONS[cat.icon] || 'Wallet',
     active: !!cat.active,
-    subcategories: subcategories.map(s => s.name),
+    subcategories: (subcategories || []).map(s => s.name),
   }
 }
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM category ORDER BY ordering').all()
-  res.json(rows.map(transform))
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('category').select('*').order('ordering')
+  const result = await Promise.all((data || []).map(c => transform(c)))
+  res.json(result)
 })
 
-router.get('/all', (req, res) => {
-  const rows = db.prepare('SELECT * FROM category ORDER BY type, ordering').all()
-  res.json(rows.map(transform))
+router.get('/all', async (req, res) => {
+  const { data } = await supabase.from('category').select('*').order('type').order('ordering')
+  const result = await Promise.all((data || []).map(c => transform(c)))
+  res.json(result)
 })
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM category WHERE id = ?').get(req.params.id)
-  if (!row) return res.status(404).json({ error: 'Category not found' })
-  res.json(transform(row))
+router.get('/:id', async (req, res) => {
+  const { data } = await supabase.from('category').select('*').eq('id', req.params.id)
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Category not found' })
+  res.json(await transform(data[0]))
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, type, color, icon, subcategories } = req.body
   const typeNum = Object.keys(CAT_TYPES).find(k => CAT_TYPES[k] === type) || 2
-  const maxOrder = db.prepare('SELECT COALESCE(MAX(ordering),0) + 1 AS next FROM category').get()
-  const info = db.prepare(`INSERT INTO category (name, color, type, active, ordering, icon, account_id, default_category)
-    VALUES (?, ?, ?, 1, ?, 0, 1, 0)`).run(
-    name || '', color || '#78716c', Number(typeNum), maxOrder.next
-  )
-  const catId = info.lastInsertRowid
+  const { data: maxOrder } = await supabase
+    .from('category')
+    .select('ordering')
+    .order('ordering', { ascending: false })
+    .limit(1)
+  const nextOrder = maxOrder && maxOrder.length > 0 ? maxOrder[0].ordering + 1 : 1
+
+  const { data } = await supabase.from('category').insert({
+    name: name || '',
+    color: color || '#78716c',
+    type: Number(typeNum),
+    active: 1,
+    ordering: nextOrder,
+    icon: 0,
+    account_id: 1,
+    default_category: 0,
+  }).select().single()
 
   if (subcategories && Array.isArray(subcategories)) {
-    const ins = db.prepare('INSERT INTO subcategory (category_id, name, ordering) VALUES (?, ?, ?)')
-    subcategories.forEach((s, i) => ins.run(catId, s, i))
+    const inserts = subcategories.map((s, i) => ({
+      category_id: data.id,
+      name: s,
+      ordering: i,
+    }))
+    await supabase.from('subcategory').insert(inserts)
   }
 
-  const row = db.prepare('SELECT * FROM category WHERE id = ?').get(catId)
-  res.status(201).json(transform(row))
+  res.status(201).json(await transform(data))
 })
 
-router.put('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM category WHERE id = ?').get(req.params.id)
-  if (!existing) return res.status(404).json({ error: 'Category not found' })
+router.put('/:id', async (req, res) => {
+  const { data: existing } = await supabase.from('category').select('*').eq('id', req.params.id)
+  if (!existing || existing.length === 0) return res.status(404).json({ error: 'Category not found' })
+  const e = existing[0]
 
   const { name, type, color, icon, active, subcategories } = req.body
-  const typeNum = type ? (Object.keys(CAT_TYPES).find(k => CAT_TYPES[k] === type) || existing.type) : existing.type
+  const typeNum = type ? (Object.keys(CAT_TYPES).find(k => CAT_TYPES[k] === type) || e.type) : e.type
 
-  db.prepare('UPDATE category SET name=?, color=?, type=?, active=? WHERE id=?').run(
-    name ?? existing.name,
-    color ?? existing.color,
-    Number(typeNum),
-    active !== undefined ? (active ? 1 : 0) : existing.active,
-    req.params.id
-  )
+  await supabase.from('category').update({
+    name: name ?? e.name,
+    color: color ?? e.color,
+    type: Number(typeNum),
+    active: active !== undefined ? (active ? 1 : 0) : e.active,
+  }).eq('id', req.params.id)
 
   if (subcategories && Array.isArray(subcategories)) {
-    db.prepare('DELETE FROM subcategory WHERE category_id = ?').run(req.params.id)
-    const ins = db.prepare('INSERT INTO subcategory (category_id, name, ordering) VALUES (?, ?, ?)')
-    subcategories.forEach((s, i) => ins.run(req.params.id, s, i))
+    await supabase.from('subcategory').delete().eq('category_id', req.params.id)
+    const inserts = subcategories.map((s, i) => ({
+      category_id: Number(req.params.id),
+      name: s,
+      ordering: i,
+    }))
+    await supabase.from('subcategory').insert(inserts)
   }
 
-  const row = db.prepare('SELECT * FROM category WHERE id = ?').get(req.params.id)
-  res.json(transform(row))
+  const { data: updated } = await supabase.from('category').select('*').eq('id', req.params.id)
+  res.json(await transform(updated[0]))
 })
 
-router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM subcategory WHERE category_id = ?').run(req.params.id)
-  db.prepare('DELETE FROM category WHERE id = ?').run(req.params.id)
+router.delete('/:id', async (req, res) => {
+  await supabase.from('subcategory').delete().eq('category_id', req.params.id)
+  await supabase.from('category').delete().eq('id', req.params.id)
   res.json({ success: true })
 })
 

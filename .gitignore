@@ -1,7 +1,12 @@
 node_modules/
 frontend/dist/
+backend/finance.db
 backend/finance.db-wal
 backend/finance.db-shm
+backend/finance.test.db
+backend/finance.test.db-wal
+backend/finance.test.db-shm
+test-results/
 .env
 .env.local
 .DS_Store

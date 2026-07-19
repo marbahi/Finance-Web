@@ -5,10 +5,20 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
-    "build:frontend": "npm run build --prefix ../frontend"
+    "build:frontend": "npm run build --prefix ../frontend",
+    "migrate": "node migrate.mjs",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "seed": "node migrate.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.7",
     "cors": "^2.8.5",
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.10"
   }
 }

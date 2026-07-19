@@ -1,14 +1,18 @@
 import { Router } from 'express'
-import db from '../db.js'
+import supabase from '../supabase.js'
 
 const router = Router()
 
 const RECUR_TYPES = { 0: 'expense', 1: 'income', 2: 'transfer' }
 const FREQ_TYPES = { 1: 'daily', 2: 'weekly', 3: 'monthly', 4: 'yearly' }
 
-function transform(r) {
-  const cat = db.prepare('SELECT name FROM category WHERE id = ?').get(r.category_id)
-  const wallet = db.prepare('SELECT name FROM wallet WHERE id = ?').get(r.wallet_id)
+async function transform(r) {
+  const [catData, walletData] = await Promise.all([
+    supabase.from('category').select('name').eq('id', r.category_id),
+    supabase.from('wallet').select('name').eq('id', r.wallet_id),
+  ])
+  const cat = catData.data?.[0]
+  const wallet = walletData.data?.[0]
   return {
     id: r.id,
     name: r.note || '',
@@ -25,78 +29,111 @@ function transform(r) {
   }
 }
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM recurring ORDER BY id').all()
-  res.json(rows.map(transform))
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('recurring').select('*').order('id')
+  const result = await Promise.all((data || []).map(r => transform(r)))
+  res.json(result)
 })
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM recurring WHERE id = ?').get(req.params.id)
-  if (!row) return res.status(404).json({ error: 'Recurring not found' })
-  res.json(transform(row))
+router.get('/:id', async (req, res) => {
+  const { data } = await supabase.from('recurring').select('*').eq('id', req.params.id)
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Recurring not found' })
+  res.json(await transform(data[0]))
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, type, amount, category, category_id, wallet, wallet_id, frequency, nextDate, note } = req.body
   const typeNum = Object.keys(RECUR_TYPES).find(k => RECUR_TYPES[k] === type) || 0
   const freqNum = Object.keys(FREQ_TYPES).find(k => FREQ_TYPES[k] === frequency) || 3
-  const catId = category_id || (category ? db.prepare('SELECT id FROM category WHERE name = ?').get(category)?.id : 0) || 0
-  const wId = wallet_id || (wallet ? db.prepare('SELECT id FROM wallet WHERE name = ?').get(wallet)?.id : 0) || 0
+
+  let catId = category_id || 0
+  if (!catId && category) {
+    const { data: cat } = await supabase.from('category').select('id').eq('name', category)
+    if (cat && cat.length > 0) catId = cat[0].id
+  }
+  let wId = wallet_id || 0
+  if (!wId && wallet) {
+    const { data: w } = await supabase.from('wallet').select('id').eq('name', wallet)
+    if (w && w.length > 0) wId = w[0].id
+  }
   const dateTime = nextDate ? new Date(nextDate).getTime() : Date.now()
 
-  const info = db.prepare(`INSERT INTO recurring (note, memo, type, recurring_type, repeat_type, repeat_date,
-    increment, amount, date_time, until_time, last_update_time, account_id, category_id, wallet_id,
-    subcategory_id, transfer_wallet_id, trans_amount, is_future)
-    VALUES (?, ?, ?, ?, 0, '', 0, ?, ?, 0, ?, 1, ?, ?, 0, 0, 0, 1)`).run(
-    name || '', note || '', Number(typeNum), Number(freqNum),
-    (Number(amount) || 0) * 100, dateTime, dateTime,
-    catId, wId
-  )
+  const { data } = await supabase.from('recurring').insert({
+    note: name || '',
+    memo: note || '',
+    type: Number(typeNum),
+    recurring_type: Number(freqNum),
+    repeat_type: 0,
+    repeat_date: '',
+    increment: 0,
+    amount: (Number(amount) || 0) * 100,
+    date_time: dateTime,
+    until_time: 0,
+    last_update_time: dateTime,
+    account_id: 1,
+    category_id: catId,
+    wallet_id: wId,
+    subcategory_id: 0,
+    transfer_wallet_id: 0,
+    trans_amount: 0,
+    is_future: 1,
+  }).select().single()
 
-  const row = db.prepare('SELECT * FROM recurring WHERE id = ?').get(info.lastInsertRowid)
-  res.status(201).json(transform(row))
+  res.status(201).json(await transform(data))
 })
 
-router.put('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM recurring WHERE id = ?').get(req.params.id)
-  if (!existing) return res.status(404).json({ error: 'Recurring not found' })
+router.put('/:id', async (req, res) => {
+  const { data: existing } = await supabase.from('recurring').select('*').eq('id', req.params.id)
+  if (!existing || existing.length === 0) return res.status(404).json({ error: 'Recurring not found' })
+  const e = existing[0]
 
   const { name, type, amount, category, category_id, wallet, wallet_id, frequency, nextDate, note, status } = req.body
+  const typeNum = type ? (Object.keys(RECUR_TYPES).find(k => RECUR_TYPES[k] === type) || e.type) : e.type
+  const freqNum = frequency ? (Object.keys(FREQ_TYPES).find(k => FREQ_TYPES[k] === frequency) || e.recurring_type) : e.recurring_type
 
-  const typeNum = type ? (Object.keys(RECUR_TYPES).find(k => RECUR_TYPES[k] === type) || existing.type) : existing.type
-  const freqNum = frequency ? (Object.keys(FREQ_TYPES).find(k => FREQ_TYPES[k] === frequency) || existing.recurring_type) : existing.recurring_type
-  const catId = category_id !== undefined ? Number(category_id) : (category ? db.prepare('SELECT id FROM category WHERE name = ?').get(category)?.id ?? existing.category_id : existing.category_id)
-  const wId = wallet_id !== undefined ? Number(wallet_id) : (wallet ? db.prepare('SELECT id FROM wallet WHERE name = ?').get(wallet)?.id ?? existing.wallet_id : existing.wallet_id)
+  let catId = category_id !== undefined ? Number(category_id) : e.category_id
+  if (category && !category_id) {
+    const { data: cat } = await supabase.from('category').select('id').eq('name', category)
+    if (cat && cat.length > 0) catId = cat[0].id
+  }
+  let wId = wallet_id !== undefined ? Number(wallet_id) : e.wallet_id
+  if (wallet && !wallet_id) {
+    const { data: w } = await supabase.from('wallet').select('id').eq('name', wallet)
+    if (w && w.length > 0) wId = w[0].id
+  }
 
-  db.prepare(`UPDATE recurring SET note=?, memo=?, type=?, recurring_type=?, amount=?, date_time=?,
-    category_id=?, wallet_id=?, is_future=? WHERE id=?`).run(
-    name ?? existing.note,
-    note ?? existing.memo,
-    Number(typeNum), Number(freqNum),
-    amount !== undefined ? Number(amount) * 100 : existing.amount,
-    nextDate !== undefined ? (nextDate ? new Date(nextDate).getTime() : existing.date_time) : existing.date_time,
-    catId, wId,
-    status !== undefined ? (status === 'active' ? 1 : 0) : existing.is_future,
-    req.params.id
-  )
+  await supabase.from('recurring').update({
+    note: name ?? e.note,
+    memo: note ?? e.memo,
+    type: Number(typeNum),
+    recurring_type: Number(freqNum),
+    amount: amount !== undefined ? Number(amount) * 100 : e.amount,
+    date_time: nextDate !== undefined ? (nextDate ? new Date(nextDate).getTime() : e.date_time) : e.date_time,
+    category_id: catId,
+    wallet_id: wId,
+    is_future: status !== undefined ? (status === 'active' ? 1 : 0) : e.is_future,
+  }).eq('id', req.params.id)
 
-  const row = db.prepare('SELECT * FROM recurring WHERE id = ?').get(req.params.id)
-  res.json(transform(row))
+  const { data: updated } = await supabase.from('recurring').select('*').eq('id', req.params.id)
+  res.json(await transform(updated[0]))
 })
 
-router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM recurring WHERE id = ?').run(req.params.id)
+router.delete('/:id', async (req, res) => {
+  await supabase.from('recurring').delete().eq('id', req.params.id)
   res.json({ success: true })
 })
 
-router.patch('/:id/toggle', (req, res) => {
-  const existing = db.prepare('SELECT * FROM recurring WHERE id = ?').get(req.params.id)
-  if (!existing) return res.status(404).json({ error: 'Recurring not found' })
+router.patch('/:id/toggle', async (req, res) => {
+  const { data: existing } = await supabase.from('recurring').select('*').eq('id', req.params.id)
+  if (!existing || existing.length === 0) return res.status(404).json({ error: 'Recurring not found' })
+  const e = existing[0]
 
-  db.prepare('UPDATE recurring SET is_future = CASE WHEN is_future = 1 THEN 0 ELSE 1 END WHERE id = ?').run(req.params.id)
+  await supabase.from('recurring').update({
+    is_future: e.is_future === 1 ? 0 : 1
+  }).eq('id', req.params.id)
 
-  const row = db.prepare('SELECT * FROM recurring WHERE id = ?').get(req.params.id)
-  res.json(transform(row))
+  const { data: updated } = await supabase.from('recurring').select('*').eq('id', req.params.id)
+  res.json(await transform(updated[0]))
 })
 
 export default router

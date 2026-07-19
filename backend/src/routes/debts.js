@@ -1,19 +1,23 @@
 import { Router } from 'express'
-import db from '../db.js'
+import supabase from '../supabase.js'
 
 const router = Router()
 
 const DEBT_TYPES = { 0: 'debt', 1: 'receivable' }
 
-function transform(d) {
-  const totalPaid = db.prepare('SELECT COALESCE(SUM(amount), 0) AS paid FROM debtTrans WHERE debt_id = ?').get(d.id)
+async function transform(d) {
+  const { data: paidData } = await supabase
+    .from('debttrans')
+    .select('amount')
+    .eq('debt_id', d.id)
+  const totalPaid = (paidData || []).reduce((sum, r) => sum + r.amount, 0)
   return {
     id: d.id,
     name: d.name || '',
     type: DEBT_TYPES[d.type] || 'debt',
     person: d.lender || '',
     amount: d.amount / 100,
-    paid: totalPaid.paid / 100,
+    paid: totalPaid / 100,
     dueDate: d.due_date ? new Date(d.due_date).toISOString().slice(0, 10) : '',
     lendDate: d.lend_date ? new Date(d.lend_date).toISOString().slice(0, 10) : '',
     note: d.name || '',
@@ -22,102 +26,125 @@ function transform(d) {
   }
 }
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM debt ORDER BY id').all()
-  res.json(rows.map(transform))
+router.get('/', async (req, res) => {
+  const { data } = await supabase.from('debt').select('*').order('id')
+  const result = await Promise.all((data || []).map(d => transform(d)))
+  res.json(result)
 })
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM debt WHERE id = ?').get(req.params.id)
-  if (!row) return res.status(404).json({ error: 'Debt not found' })
-  res.json(transform(row))
+router.get('/:id', async (req, res) => {
+  const { data } = await supabase.from('debt').select('*').eq('id', req.params.id)
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Debt not found' })
+  res.json(await transform(data[0]))
 })
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { name, type, person, amount, dueDate, lendDate, color, note } = req.body
   const typeNum = Object.keys(DEBT_TYPES).find(k => DEBT_TYPES[k] === type) || 0
 
-  const info = db.prepare(`INSERT INTO debt (name, lender, color, pay, amount, due_date, lend_date, account_id, status, type)
-    VALUES (?, ?, ?, 0, ?, ?, ?, 1, 0, ?)`).run(
-    note || name || '', person || '', color || '#78716c',
-    (Number(amount) || 0) * 100,
-    dueDate ? new Date(dueDate).getTime() : 0,
-    lendDate ? new Date(lendDate).getTime() : 0,
-    Number(typeNum)
-  )
+  const { data } = await supabase.from('debt').insert({
+    name: note || name || '',
+    lender: person || '',
+    color: color || '#78716c',
+    pay: 0,
+    amount: (Number(amount) || 0) * 100,
+    due_date: dueDate ? new Date(dueDate).getTime() : 0,
+    lend_date: lendDate ? new Date(lendDate).getTime() : 0,
+    account_id: 1,
+    status: 0,
+    type: Number(typeNum),
+  }).select().single()
 
-  const row = db.prepare('SELECT * FROM debt WHERE id = ?').get(info.lastInsertRowid)
-  res.status(201).json(transform(row))
+  res.status(201).json(await transform(data))
 })
 
-router.put('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM debt WHERE id = ?').get(req.params.id)
-  if (!existing) return res.status(404).json({ error: 'Debt not found' })
+router.put('/:id', async (req, res) => {
+  const { data: existing } = await supabase.from('debt').select('*').eq('id', req.params.id)
+  if (!existing || existing.length === 0) return res.status(404).json({ error: 'Debt not found' })
+  const e = existing[0]
 
   const { name, type, person, amount, dueDate, lendDate, color, note, status } = req.body
-  const typeNum = type ? (Object.keys(DEBT_TYPES).find(k => DEBT_TYPES[k] === type) || existing.type) : existing.type
+  const typeNum = type ? (Object.keys(DEBT_TYPES).find(k => DEBT_TYPES[k] === type) || e.type) : e.type
 
-  db.prepare(`UPDATE debt SET name=?, lender=?, color=?, amount=?, due_date=?, lend_date=?, status=?, type=? WHERE id=?`).run(
-    note ?? name ?? existing.name,
-    person ?? existing.lender,
-    color ?? existing.color,
-    amount !== undefined ? Number(amount) * 100 : existing.amount,
-    dueDate !== undefined ? (dueDate ? new Date(dueDate).getTime() : 0) : existing.due_date,
-    lendDate !== undefined ? (lendDate ? new Date(lendDate).getTime() : 0) : existing.lend_date,
-    status !== undefined ? (status === 'paid' ? 1 : 0) : existing.status,
-    Number(typeNum),
-    req.params.id
-  )
+  const { data } = await supabase.from('debt').update({
+    name: note ?? name ?? e.name,
+    lender: person ?? e.lender,
+    color: color ?? e.color,
+    amount: amount !== undefined ? Number(amount) * 100 : e.amount,
+    due_date: dueDate !== undefined ? (dueDate ? new Date(dueDate).getTime() : 0) : e.due_date,
+    lend_date: lendDate !== undefined ? (lendDate ? new Date(lendDate).getTime() : 0) : e.lend_date,
+    status: status !== undefined ? (status === 'paid' ? 1 : 0) : e.status,
+    type: Number(typeNum),
+  }).eq('id', req.params.id).select().single()
 
-  const row = db.prepare('SELECT * FROM debt WHERE id = ?').get(req.params.id)
-  res.json(transform(row))
+  res.json(await transform(data))
 })
 
-router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM debtTrans WHERE debt_id = ?').run(req.params.id)
-  db.prepare('DELETE FROM debt WHERE id = ?').run(req.params.id)
+router.delete('/:id', async (req, res) => {
+  await supabase.from('debttrans').delete().eq('debt_id', req.params.id)
+  await supabase.from('debt').delete().eq('id', req.params.id)
   res.json({ success: true })
 })
 
-router.post('/:id/pay', (req, res) => {
-  const debt = db.prepare('SELECT * FROM debt WHERE id = ?').get(req.params.id)
-  if (!debt) return res.status(404).json({ error: 'Debt not found' })
+router.post('/:id/pay', async (req, res) => {
+  const { data: debt } = await supabase.from('debt').select('*').eq('id', req.params.id)
+  if (!debt || debt.length === 0) return res.status(404).json({ error: 'Debt not found' })
+  const d = debt[0]
 
   const { wallet, amount, date, note } = req.body
-  const w = db.prepare('SELECT id, amount FROM wallet WHERE name = ?').get(wallet)
-  if (!w) return res.status(400).json({ error: 'Wallet not found' })
+  const { data: wData } = await supabase.from('wallet').select('id, amount').eq('name', wallet)
+  if (!wData || wData.length === 0) return res.status(400).json({ error: 'Wallet not found' })
+  const w = wData[0]
 
   const payAmount = (Number(amount) || 0) * 100
   const dateTime = date ? new Date(date + 'T00:00:00').getTime() : Date.now()
 
-  db.prepare('INSERT INTO debtTrans (amount, date_time, debt_id, note, type) VALUES (?, ?, ?, ?, ?)').run(
-    payAmount, dateTime, req.params.id, note || '', debt.type
-  )
+  await supabase.from('debttrans').insert({
+    amount: payAmount,
+    date_time: dateTime,
+    debt_id: req.params.id,
+    note: note || '',
+    type: d.type,
+  })
 
-  const isDebt = debt.type === 0
+  const isDebt = d.type === 0
   const delta = isDebt ? -payAmount : payAmount
-  db.prepare('UPDATE wallet SET amount = amount + ? WHERE id = ?').run(delta, w.id)
+  await supabase.rpc('update_wallet_balance', { wallet_id: w.id, delta })
 
-  const debtCat = db.prepare("SELECT id FROM category WHERE name = 'Lainnya' AND type = 1").get()
-  const incomeCat = db.prepare("SELECT id FROM category WHERE name = 'Gaji' AND type = 2").get()
+  const [{ data: debtCat }, { data: incomeCat }] = await Promise.all([
+    supabase.from('category').select('id').eq('name', 'Lainnya').eq('type', 1),
+    supabase.from('category').select('id').eq('name', 'Gaji').eq('type', 2),
+  ])
 
-  db.prepare(`INSERT INTO trans (note, memo, type, amount, date_time, account_id, fee_id,
-    category_id, subcategory_id, wallet_id, transfer_wallet_id, trans_amount, debt_id, debt_trans_id, budget_id)
-    VALUES (?, ?, ?, ?, ?, 1, 0, ?, 0, ?, -1, 0, ?, 0, ?)`).run(
-    note || (isDebt ? `Bayar ${debt.name}` : `Terima ${debt.name}`),
-    '', isDebt ? 1 : 0, isDebt ? -payAmount : payAmount,
-    dateTime,
-    (isDebt ? (debtCat ? debtCat.id : 8) : (incomeCat ? incomeCat.id : 18)),
-    w.id, req.params.id, req.body.budget_id || null
-  )
+  await supabase.from('trans').insert({
+    note: note || (isDebt ? `Bayar ${d.name}` : `Terima ${d.name}`),
+    memo: '',
+    type: isDebt ? 1 : 0,
+    amount: isDebt ? -payAmount : payAmount,
+    date_time: dateTime,
+    account_id: 1,
+    fee_id: 0,
+    category_id: (isDebt ? (debtCat ? debtCat[0].id : 8) : (incomeCat ? incomeCat[0].id : 18)),
+    subcategory_id: 0,
+    wallet_id: w.id,
+    transfer_wallet_id: -1,
+    trans_amount: 0,
+    debt_id: req.params.id,
+    debt_trans_id: 0,
+    budget_id: req.body.budget_id || null,
+  })
 
-  const updated = db.prepare('SELECT * FROM debt WHERE id = ?').get(req.params.id)
-  res.json(transform(updated))
+  const { data: updated } = await supabase.from('debt').select('*').eq('id', req.params.id)
+  res.json(await transform(updated[0]))
 })
 
-router.get('/:id/payments', (req, res) => {
-  const rows = db.prepare('SELECT * FROM debtTrans WHERE debt_id = ? ORDER BY date_time DESC').all(req.params.id)
-  res.json(rows.map(r => ({
+router.get('/:id/payments', async (req, res) => {
+  const { data } = await supabase
+    .from('debttrans')
+    .select('*')
+    .eq('debt_id', req.params.id)
+    .order('date_time', { ascending: false })
+  res.json((data || []).map(r => ({
     id: r.id,
     amount: r.amount / 100,
     date: r.date_time ? new Date(r.date_time).toISOString().slice(0, 10) : '',
