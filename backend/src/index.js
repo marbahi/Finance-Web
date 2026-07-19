@@ -57,6 +57,10 @@ app.get('*', (req, res) => {
   res.sendFile(join(frontendDist, 'index.html'))
 })
 
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Backend running on port ${PORT}`);
+  });
+}
+
+export default app
