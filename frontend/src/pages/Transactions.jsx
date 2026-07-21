@@ -39,6 +39,7 @@ export default function Transactions() {
   const [sortField, setSortField] = useState('date')
   const [sortDir, setSortDir] = useState('desc')
   const [page, setPage] = useState(1)
+  const [isMobile, setIsMobile] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editId, setEditId] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
@@ -76,6 +77,14 @@ export default function Transactions() {
       }))
     }
   }, [firstExpenseCat, firstWallet, secondWallet])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   const perPage = 15
 
@@ -199,7 +208,7 @@ export default function Transactions() {
           <p className="text-sm text-gray-500 mt-0.5">{transactions.length} total transaksi</p>
         </div>
         <button onClick={openAdd}
-          className="flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
+          className="hidden md:flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
           <Plus size={16} weight="bold" />
           Tambah Transaksi
         </button>
@@ -268,61 +277,116 @@ export default function Transactions() {
         )}
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th onClick={() => toggleSort('date')} className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
-                  Tanggal <SortIcon field="date" />
-                </th>
-                <th onClick={() => toggleSort('note')} className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
-                  Catatan <SortIcon field="note" />
-                </th>
-                <th onClick={() => toggleSort('category')} className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
-                  Kategori <SortIcon field="category" />
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Dompet</th>
-                <th onClick={() => toggleSort('amount')} className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
-                  Jumlah <SortIcon field="amount" />
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paged.map(t => (
-                <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                  <td className="px-4 py-3 text-xs text-gray-500">{formatDate(t.date)}</td>
-                  <td className="px-4 py-3">
-                    <div className="text-sm font-medium text-gray-900">{t.note}</div>
-                    {t.memo && <div className="text-xs text-gray-400">{t.memo}</div>}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-gray-500">{t.category}{t.subcategory ? ` — ${t.subcategory}` : ''}</td>
-                  <td className="px-4 py-3 text-xs">
-                    <span className="text-gray-500">{t.wallet}</span>
-                    {t.transferWallet && <span className="text-gray-400"> → {t.transferWallet}</span>}
-                  </td>
-                  <td className={`px-4 py-3 text-sm font-semibold text-right ${
-                    t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-rose-600' : 'text-gray-600'
+      {/* Mobile card list */}
+      {isMobile ? (
+        <div className="space-y-2">
+          {paged.map(t => (
+            <div key={t.id} className="bg-white rounded-xl border border-gray-100 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                    t.type === 'income' ? 'bg-emerald-100' :
+                    t.type === 'expense' ? 'bg-rose-100' :
+                    'bg-gray-100'
+                  }`}>
+                    <span className={`text-sm font-bold ${
+                      t.type === 'income' ? 'text-emerald-600' :
+                      t.type === 'expense' ? 'text-rose-600' :
+                      'text-gray-500'
+                    }`}>
+                      {t.type === 'income' ? 'I' : t.type === 'expense' ? 'E' : 'T'}
+                    </span>
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{t.note}</p>
+                    <p className="text-xs text-gray-400 truncate">{t.category}{t.subcategory ? ` — ${t.subcategory}` : ''}</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className={`text-sm font-semibold ${
+                    t.type === 'income' ? 'text-emerald-600' :
+                    t.type === 'expense' ? 'text-rose-600' :
+                    'text-gray-600'
                   }`}>
                     {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatRp(t.amount)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button onClick={() => openEdit(t)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                      <PencilSimple size={14} />
-                    </button>
-                    <button onClick={() => setDeleteId(t.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
-                      <Trash size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">{formatDate(t.date)}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
+                <p className="text-xs text-gray-400 truncate">{t.wallet}{t.transferWallet ? ` → ${t.transferWallet}` : ''}</p>
+                <div className="flex gap-1">
+                  <button onClick={() => openEdit(t)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                    <PencilSimple size={14} />
+                  </button>
+                  <button onClick={() => setDeleteId(t.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                    <Trash size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {paged.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-8">Tidak ada transaksi</p>
+          )}
         </div>
-        {paged.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada transaksi</p>}
-      </div>
+      ) : (
+        /* Desktop table */
+        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  <th onClick={() => toggleSort('date')} className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                    Tanggal <SortIcon field="date" />
+                  </th>
+                  <th onClick={() => toggleSort('note')} className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                    Catatan <SortIcon field="note" />
+                  </th>
+                  <th onClick={() => toggleSort('category')} className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                    Kategori <SortIcon field="category" />
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Dompet</th>
+                  <th onClick={() => toggleSort('amount')} className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700">
+                    Jumlah <SortIcon field="amount" />
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.map(t => (
+                  <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td className="px-4 py-3 text-xs text-gray-500">{formatDate(t.date)}</td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-medium text-gray-900">{t.note}</div>
+                      {t.memo && <div className="text-xs text-gray-400">{t.memo}</div>}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{t.category}{t.subcategory ? ` — ${t.subcategory}` : ''}</td>
+                    <td className="px-4 py-3 text-xs">
+                      <span className="text-gray-500">{t.wallet}</span>
+                      {t.transferWallet && <span className="text-gray-400"> → {t.transferWallet}</span>}
+                    </td>
+                    <td className={`px-4 py-3 text-sm font-semibold text-right ${
+                      t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-rose-600' : 'text-gray-600'
+                    }`}>
+                      {t.type === 'income' ? '+' : t.type === 'expense' ? '-' : ''}{formatRp(t.amount)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button onClick={() => openEdit(t)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                        <PencilSimple size={14} />
+                      </button>
+                      <button onClick={() => setDeleteId(t.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                        <Trash size={14} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {paged.length === 0 && <p className="text-sm text-gray-400 text-center py-8">Tidak ada transaksi</p>}
+        </div>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
@@ -335,6 +399,12 @@ export default function Transactions() {
           ))}
         </div>
       )}
+
+      {/* Mobile FAB */}
+      <button onClick={openAdd}
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
+        <Plus size={24} weight="bold" />
+      </button>
 
       {/* Add/Edit Modal */}
       {showModal && (

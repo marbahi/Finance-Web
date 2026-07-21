@@ -129,7 +129,7 @@ export default function Debts() {
           <p className="text-sm text-gray-500 mt-0.5">Catat pinjaman dan piutang</p>
         </div>
         <button onClick={openAdd}
-          className="flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
+          className="hidden md:flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
           <Plus size={16} weight="bold" />
           Tambah
         </button>
@@ -200,22 +200,22 @@ export default function Debts() {
                   <div className="flex items-center gap-1 ml-2">
                     {isActive && (
                       <button onClick={() => openPay(d)}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                        className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
                         title={d.type === 'debt' ? 'Bayar' : 'Terima'}>
                         <CurrencyDollar size={14} />
                       </button>
                     )}
                     <button onClick={() => toggleStatus(d.id)}
-                      className={`p-1.5 rounded-lg transition-colors ${
+                      className={`p-2 rounded-lg transition-colors ${
                         d.status === 'active' ? 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
                       }`}
                       title={d.status === 'active' ? 'Tandai Lunas' : 'Aktifkan kembali'}>
                       <span className={`w-3 h-3 rounded-full block ${d.status === 'paid' ? 'bg-emerald-200' : 'bg-gray-200'}`} />
                     </button>
-                    <button onClick={() => openEdit(d)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                    <button onClick={() => openEdit(d)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                       <PencilSimple size={14} />
                     </button>
-                    <button onClick={() => setDeleteId(d.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                    <button onClick={() => setDeleteId(d.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
                       <Trash size={14} />
                     </button>
                   </div>
@@ -250,6 +250,12 @@ export default function Debts() {
           <p className="text-sm text-gray-400">Tidak ada data</p>
         </div>
       )}
+
+      {/* Mobile FAB */}
+      <button onClick={openAdd}
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
+        <Plus size={24} weight="bold" />
+      </button>
 
       {/* Pay Modal */}
       {payModal && (

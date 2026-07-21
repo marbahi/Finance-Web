@@ -109,7 +109,7 @@ export default function Recurring() {
           <p className="text-sm text-gray-500 mt-0.5">Atur pemasukan dan pengeluaran rutin</p>
         </div>
         <button onClick={openAdd}
-          className="flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
+          className="hidden md:flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
           <Plus size={16} weight="bold" />
           Tambah Berulang
         </button>
@@ -168,15 +168,15 @@ export default function Recurring() {
                 </div>
                 <div className="flex items-center gap-1 ml-2">
                   <button onClick={() => toggleStatus(i.id)}
-                    className={`p-1.5 rounded-lg transition-colors ${
+                    className={`p-2 rounded-lg transition-colors ${
                       i.status === 'active' ? 'text-gray-400 hover:text-amber-500 hover:bg-amber-50' : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50'
                     }`}>
                     {i.status === 'active' ? <Pause size={14} /> : <Play size={14} />}
                   </button>
-                  <button onClick={() => openEdit(i)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                  <button onClick={() => openEdit(i)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                     <PencilSimple size={14} />
                   </button>
-                  <button onClick={() => setDeleteId(i.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                  <button onClick={() => setDeleteId(i.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
                     <Trash size={14} />
                   </button>
                 </div>
@@ -192,6 +192,12 @@ export default function Recurring() {
           <p className="text-sm text-gray-400">Tidak ada transaksi berulang</p>
         </div>
       )}
+
+      {/* Mobile FAB */}
+      <button onClick={openAdd}
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
+        <Plus size={24} weight="bold" />
+      </button>
 
       {/* Add/Edit Modal */}
       {showModal && (

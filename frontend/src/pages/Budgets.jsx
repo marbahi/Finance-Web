@@ -119,40 +119,33 @@ export default function Budgets() {
           <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Anggaran</h1>
           <p className="text-sm text-gray-500 mt-0.5">Kelola batas pengeluaran per kategori</p>
         </div>
-        <button onClick={openAdd}
-          className="flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
-          <Plus size={16} weight="bold" />
-          Tambah Anggaran
-        </button>
-      </div>
-
-      {/* Month Picker + Summary */}
-      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={prevMonth} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <button onClick={prevMonth} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
             <CaretLeft size={16} />
           </button>
           <span className="text-base font-semibold text-gray-900 min-w-[140px] text-center">
             {months[month]} {year}
           </span>
-          <button onClick={nextMonth} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <button onClick={nextMonth} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
             <CaretRight size={16} />
           </button>
         </div>
-        <div className="flex items-center gap-6 text-sm">
-          <div>
-            <span className="text-gray-400">Anggaran </span>
-            <span className="font-semibold text-gray-900">{formatRp(totalBudget)}</span>
-          </div>
-          <div>
-            <span className="text-gray-400">Terpakai </span>
-            <span className="font-semibold text-gray-900">{formatRp(totalSpent)}</span>
-          </div>
-          <div>
-            <span className="text-gray-400">Sisa </span>
-            <span className={`font-semibold ${totalBudget - totalSpent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {formatRp(totalBudget - totalSpent)}
-            </span>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="text-xs text-gray-400">Anggaran</div>
+          <div className="text-lg font-semibold text-gray-900 mt-1">{formatRp(totalBudget)}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="text-xs text-gray-400">Terpakai</div>
+          <div className="text-lg font-semibold text-gray-900 mt-1">{formatRp(totalSpent)}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="text-xs text-gray-400">Sisa</div>
+          <div className={`text-lg font-semibold mt-1 ${totalBudget - totalSpent >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+            {formatRp(totalBudget - totalSpent)}
           </div>
         </div>
       </div>
@@ -181,10 +174,10 @@ export default function Budgets() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1 ml-2">
-                    <button onClick={() => openEdit(b)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                    <button onClick={() => openEdit(b)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                       <PencilSimple size={14} />
                     </button>
-                    <button onClick={() => setDeleteId(b.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                    <button onClick={() => setDeleteId(b.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
                       <Trash size={14} />
                     </button>
                   </div>
@@ -205,6 +198,12 @@ export default function Budgets() {
           <p className="text-sm text-gray-400">Belum ada anggaran untuk bulan ini</p>
         </div>
       )}
+
+      {/* Mobile FAB */}
+      <button onClick={openAdd}
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
+        <Plus size={24} weight="bold" />
+      </button>
 
       {/* Add/Edit Modal */}
       {showModal && (

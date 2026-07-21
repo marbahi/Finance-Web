@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 
 const AuthContext = createContext(null)
 
@@ -11,8 +11,23 @@ function getStoredAuth() {
   return null
 }
 
+function devAutoLogin() {
+  const obj = {
+    token: 'dev-token-' + Date.now(),
+    user: { username: 'dev' },
+  }
+  localStorage.setItem('finance_token', obj.token)
+  localStorage.setItem('finance_user', JSON.stringify(obj.user))
+  return obj
+}
+
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState(getStoredAuth)
+  const [auth, setAuth] = useState(() => {
+    const stored = getStoredAuth()
+    if (stored) return stored
+    if (import.meta.env.DEV) return devAutoLogin()
+    return null
+  })
 
   const login = useCallback(async (username, password) => {
     const res = await fetch('/api/auth/login', {

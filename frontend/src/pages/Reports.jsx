@@ -108,18 +108,18 @@ export default function Reports() {
           <p className="text-sm text-gray-500 mt-0.5">Analisis keuangan tahunan</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setYear(y => y - 1)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <button onClick={() => setYear(y => y - 1)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
             <CaretLeft size={16} />
           </button>
           <span className="text-base font-semibold text-gray-900 min-w-[60px] text-center">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+          <button onClick={() => setYear(y => y + 1)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
             <CaretRight size={16} />
           </button>
         </div>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-fit">
+      <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-fit flex-wrap">
         {tabs.map(t => (
           <button key={t.key} onClick={() => setActiveTab(t.key)}
             className={`px-4 py-1.5 text-xs font-medium rounded-md transition-colors ${

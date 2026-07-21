@@ -87,18 +87,16 @@ export default function Categories() {
           <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">Kategori</h1>
           <p className="text-sm text-gray-500 mt-0.5">{incomeCount} pemasukan · {expenseCount} pengeluaran</p>
         </div>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
-        >
+        <button onClick={openAdd}
+          className="hidden md:flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
           <Plus size={16} weight="bold" />
           Tambah Kategori
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
+      <div className="space-y-3">
+        <div className="relative max-w-xs">
           <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text" placeholder="Cari kategori..." value={search}
@@ -106,7 +104,7 @@ export default function Categories() {
             className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300"
           />
         </div>
-        <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5">
+        <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-fit">
           {[
             { key: 'all', label: 'Semua' },
             { key: 'income', label: 'Pemasukan' },
@@ -149,19 +147,19 @@ export default function Categories() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => toggleExpand(c.id)}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     {expanded[c.id] ? <CaretDown size={14} /> : <CaretRight size={14} />}
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); openEdit(c) }}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <PencilSimple size={14} />
                   </button>
                   <button
                     onClick={e => { e.stopPropagation(); setDeleteId(c.id) }}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                    className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                   >
                     <Trash size={14} />
                   </button>
@@ -196,10 +194,16 @@ export default function Categories() {
         </div>
       )}
 
+      {/* Mobile FAB */}
+      <button onClick={openAdd}
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
+        <Plus size={24} weight="bold" />
+      </button>
+
       {/* Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-xl w-full max-w-lg mx-4 p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-semibold text-gray-900">{editId ? 'Edit Kategori' : 'Tambah Kategori'}</h2>
               <button onClick={() => setShowModal(false)} className="p-1 text-gray-400 hover:text-gray-700"><X size={18} /></button>

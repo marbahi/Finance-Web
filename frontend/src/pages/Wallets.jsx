@@ -102,7 +102,7 @@ export default function Wallets() {
           <p className="text-sm text-gray-500 mt-0.5">Kelola rekening, tunai, kartu kredit, dan e-wallet</p>
         </div>
         <button onClick={openAdd}
-          className="flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
+          className="hidden md:flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
           <Plus size={16} weight="bold" />
           Tambah Dompet
         </button>
@@ -154,11 +154,11 @@ export default function Wallets() {
                   </div>
                   <div className="flex items-center gap-1">
                     <button onClick={e => { e.stopPropagation(); openEdit(w) }}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                      className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
                       <PencilSimple size={14} />
                     </button>
                     <button onClick={e => { e.stopPropagation(); setDeleteId(w.id) }}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                      className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
                       <Trash size={14} />
                     </button>
                   </div>
@@ -222,6 +222,12 @@ export default function Wallets() {
           <p className="text-sm text-gray-400">(Data transaksi akan diintegrasikan dari API)</p>
         </div>
       )}
+
+      {/* Mobile FAB */}
+      <button onClick={openAdd}
+        className="md:hidden fixed bottom-6 right-6 z-30 w-14 h-14 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-colors">
+        <Plus size={24} weight="bold" />
+      </button>
 
       {/* Add/Edit Modal */}
       {showModal && (
