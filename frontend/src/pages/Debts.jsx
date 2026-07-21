@@ -174,57 +174,54 @@ export default function Debts() {
             <div key={d.id} className={`bg-white rounded-xl border transition-all p-5 ${
               d.status === 'paid' ? 'border-green-100 opacity-60' : overdue ? 'border-rose-200' : 'border-gray-100'
             }`}>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3 min-w-0">
+              {/* Top: icon + name (left) | action buttons (right) */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                     d.type === 'debt' ? 'bg-rose-50' : 'bg-emerald-50'
                   }`}>
                     <ArrowRight size={18} className={d.type === 'debt' ? 'text-rose-500' : 'text-emerald-500'} weight="bold" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900">{d.name}</span>
-                      {d.status === 'paid' && <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium">Lunas</span>}
-                      {overdue && <span className="text-[10px] text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded font-medium">Terlambat</span>}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-gray-900 truncate">{d.name}</span>
+                      {d.status === 'paid' && <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium shrink-0">Lunas</span>}
+                      {overdue && <span className="text-[10px] text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded font-medium shrink-0">Terlambat</span>}
                     </div>
-                    <div className="text-xs text-gray-400 mt-0.5">{d.person}</div>
+                    <div className="text-xs text-gray-400 mt-0.5 truncate">{d.person}</div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <div className="text-right">
-                    <div className={`text-sm font-semibold ${d.type === 'debt' ? 'text-rose-600' : 'text-emerald-600'}`}>
-                      {formatRp(remaining)}
-                    </div>
-                    <div className="text-xs text-gray-400">{d.type === 'debt' ? 'Hutang' : 'Piutang'}</div>
-                  </div>
-                  <div className="flex items-center gap-1 ml-2">
-                    {isActive && (
-                      <button onClick={() => openPay(d)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                        title={d.type === 'debt' ? 'Bayar' : 'Terima'}>
-                        <CurrencyDollar size={14} />
-                      </button>
-                    )}
-                    <button onClick={() => toggleStatus(d.id)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        d.status === 'active' ? 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
-                      }`}
-                      title={d.status === 'active' ? 'Tandai Lunas' : 'Aktifkan kembali'}>
-                      <span className={`w-3 h-3 rounded-full block ${d.status === 'paid' ? 'bg-emerald-200' : 'bg-gray-200'}`} />
+                <div className="flex items-center gap-1 shrink-0">
+                  {isActive && (
+                    <button onClick={() => openPay(d)}
+                      className="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                      title={d.type === 'debt' ? 'Bayar' : 'Terima'}>
+                      <CurrencyDollar size={14} />
                     </button>
-                    <button onClick={() => openEdit(d)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
-                      <PencilSimple size={14} />
-                    </button>
-                    <button onClick={() => setDeleteId(d.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
-                      <Trash size={14} />
-                    </button>
-                  </div>
+                  )}
+                  <button onClick={() => toggleStatus(d.id)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      d.status === 'active' ? 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'
+                    }`}
+                    title={d.status === 'active' ? 'Tandai Lunas' : 'Aktifkan kembali'}>
+                    <span className={`w-3 h-3 rounded-full block ${d.status === 'paid' ? 'bg-emerald-200' : 'bg-gray-200'}`} />
+                  </button>
+                  <button onClick={() => openEdit(d)} className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors">
+                    <PencilSimple size={14} />
+                  </button>
+                  <button onClick={() => setDeleteId(d.id)} className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                    <Trash size={14} />
+                  </button>
                 </div>
               </div>
 
-              {/* Progress bar */}
+              {/* Amount + Progress */}
               <div className="mt-3">
-                <div className="flex justify-between text-xs text-gray-400 mb-1">
+                <div className={`text-sm font-semibold ${d.type === 'debt' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                  {formatRp(remaining)}
+                </div>
+                <div className="text-xs text-gray-400 mt-0.5">{d.type === 'debt' ? 'Hutang' : 'Piutang'}</div>
+                <div className="flex justify-between text-xs text-gray-400 mt-3 mb-1">
                   <span>Terkumpul {formatRp(d.paid)}</span>
                   <span>Target {formatRp(d.amount)}</span>
                 </div>
