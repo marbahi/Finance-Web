@@ -36,14 +36,23 @@ async function updateWalletBalance(typeNum, amountCents, walletId, transferWalle
   const absAmount = Math.abs(amountCents)
   const mult = direction === 'reverse' ? -1 : 1
   const delta = absAmount * mult
+
+  async function apply(wid, d, label) {
+    const { error } = await supabase.rpc('update_wallet_balance', { wallet_id: wid, delta: d })
+    if (error) {
+      console.error(`[balance] ${label} wallet ${wid} delta ${d} FAILED:`, error.message)
+      throw new Error(`Gagal update saldo dompet: ${error.message}`)
+    }
+  }
+
   if (Number(typeNum) === 1) {
-    await supabase.rpc('update_wallet_balance', { wallet_id: walletId, delta: -delta })
+    await apply(walletId, -delta, 'expense')
   } else if (Number(typeNum) === 0) {
-    await supabase.rpc('update_wallet_balance', { wallet_id: walletId, delta })
+    await apply(walletId, delta, 'income')
   } else if (Number(typeNum) === 2) {
-    await supabase.rpc('update_wallet_balance', { wallet_id: walletId, delta: -delta })
+    await apply(walletId, -delta, 'transfer-source')
     if (transferWalletId > 0) {
-      await supabase.rpc('update_wallet_balance', { wallet_id: transferWalletId, delta })
+      await apply(transferWalletId, delta, 'transfer-dest')
     }
   }
 }
@@ -108,6 +117,9 @@ router.post('/', async (req, res) => {
   const twId = tw.data && tw.data.length > 0 ? tw.data[0].id : -1
 
   const typeNum = Object.keys(TRANS_TYPES).find(k => TRANS_TYPES[k] === type) || 1
+  if (Number(typeNum) === 2 && twId <= 0) {
+    return res.status(400).json({ error: 'Dompet tujuan transfer tidak ditemukan. Periksa nama dompet tujuan.' })
+  }
   const dbAmount = (typeNum === 1 ? -1 : 1) * Math.abs(Number(amount) || 0) * 100
   const dateTime = date ? new Date(date + 'T00:00:00').getTime() : Date.now()
 
@@ -169,6 +181,10 @@ router.put('/:id', async (req, res) => {
   const catId = cat.data && cat.data.length > 0 ? cat.data[0].id : existing.category_id
   const subId = sub.data !== null ? (sub.data.length > 0 ? sub.data[0].id : 0) : existing.subcategory_id
   const twId = tw.data !== null ? (tw.data.length > 0 ? tw.data[0].id : -1) : existing.transfer_wallet_id
+
+  if (Number(typeNum) === 2 && twId <= 0) {
+    return res.status(400).json({ error: 'Dompet tujuan transfer tidak ditemukan. Periksa nama dompet tujuan.' })
+  }
 
   const { error: updateError } = await supabase.from('trans').update({
     note: note ?? existing.note,

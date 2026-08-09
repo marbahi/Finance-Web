@@ -153,7 +153,7 @@ export default function Transactions() {
       date: t.date, type: t.type, note: t.note, memo: t.memo || '',
       category: t.category, subcategory: t.subcategory || '',
       amount: String(t.amount), wallet: t.wallet,
-      transferWallet: t.transferWallet || 'Mandiri',
+      transferWallet: t.transferWallet || '',
     })
     setShowModal(true)
   }
@@ -164,6 +164,10 @@ export default function Transactions() {
       category: form.category, subcategory: form.subcategory,
       amount: parseInt(form.amount) || 0, wallet: form.wallet,
       transferWallet: form.type === 'transfer' ? form.transferWallet : '',
+    }
+    if (form.type === 'transfer' && !data.transferWallet) {
+      alert('Pilih dompet tujuan transfer terlebih dahulu.')
+      return
     }
     try {
       if (editId) {
@@ -484,6 +488,7 @@ export default function Transactions() {
                   <label className="text-sm font-medium text-gray-700 mb-1.5 block">Dompet Tujuan</label>
                   <select value={form.transferWallet} onChange={e => setForm(f => ({ ...f, transferWallet: e.target.value }))}
                     className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    {form.transferWallet === '' && <option value="">— Pilih Dompet Tujuan —</option>}
                     {walletNames.filter(w => w !== form.wallet).map(w => <option key={w} value={w}>{w}</option>)}
                   </select>
                 </div>
