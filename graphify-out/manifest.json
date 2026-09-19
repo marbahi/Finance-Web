@@ -1,0 +1,477 @@
+{
+  ".opencode/opencode.json": {
+    "mtime": 1784720539.8454525,
+    "ast_hash": "f2ae21510d07365eb2bce8159272c7a0",
+    "semantic_hash": ""
+  },
+  ".opencode/plugins/graphify.js": {
+    "mtime": 1784720539.8438537,
+    "ast_hash": "b33d000860642c6f4907a877e0387a21",
+    "semantic_hash": ""
+  },
+  "api/index.js": {
+    "mtime": 1784460518.6011379,
+    "ast_hash": "a722e6c9f86a38643935ec62dc6ea7fe",
+    "semantic_hash": ""
+  },
+  "backend/migrate.mjs": {
+    "mtime": 1784459072.024923,
+    "ast_hash": "071b10dd527d87d89e2de961378797db",
+    "semantic_hash": ""
+  },
+  "backend/migrations/001_initial.sql": {
+    "mtime": 1784459041.678206,
+    "ast_hash": "211368b71602fa9deb67aaa3063322c4",
+    "semantic_hash": ""
+  },
+  "backend/migrations/002_security.sql": {
+    "mtime": 1784462677.6513433,
+    "ast_hash": "c9771c0d72d40d0ff68ac01a4a603a1f",
+    "semantic_hash": ""
+  },
+  "backend/migrations/003_fix_sequences.sql": {
+    "mtime": 1784463602.846289,
+    "ast_hash": "df99221410dfc507e42c3dbfc17b81da",
+    "semantic_hash": ""
+  },
+  "backend/migrations/003_fix_transfer_integrity.sql": {
+    "mtime": 1786276622.8589966,
+    "ast_hash": "1dab85fe28947b0e3065144783b7692a",
+    "semantic_hash": ""
+  },
+  "backend/package.json": {
+    "mtime": 1784459199.4640148,
+    "ast_hash": "600c7d649a5df2e5803ae742cb54fec9",
+    "semantic_hash": ""
+  },
+  "backend/schema_check.mjs": {
+    "mtime": 1784048632.3686268,
+    "ast_hash": "0cc4dc1a2544746a3d9b5a18d2de085d",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/budgets.test.js": {
+    "mtime": 1784125955.4579952,
+    "ast_hash": "7bb6821dd430c4521bcfec9191d855f9",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/categories.test.js": {
+    "mtime": 1784125943.572225,
+    "ast_hash": "d01fdafb730a38c9fc9feead0b487e44",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/debts.test.js": {
+    "mtime": 1784125960.8898664,
+    "ast_hash": "bea3ccd801e5a66776c7596bd988456e",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/goals.test.js": {
+    "mtime": 1784126028.2550702,
+    "ast_hash": "6834bcfea3735f141bff48aeae26ab0f",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/health.test.js": {
+    "mtime": 1784125930.1678698,
+    "ast_hash": "7591cc8dbf949c8027d98f279bbbf51b",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/helpers.js": {
+    "mtime": 1784125925.298933,
+    "ast_hash": "bb0b07c44a0231fd565dcc6ebd4946bc",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/recurring.test.js": {
+    "mtime": 1784125971.3194168,
+    "ast_hash": "c80c140773f0b35da0e807e36bcb434a",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/templates.test.js": {
+    "mtime": 1784126029.4720466,
+    "ast_hash": "f7f7f2cb19691de5c6cdab344c68fd69",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/transactions.test.js": {
+    "mtime": 1784126080.48611,
+    "ast_hash": "44e70e6256aa7d4377b76d8a68b014ab",
+    "semantic_hash": ""
+  },
+  "backend/src/__tests__/wallets.test.js": {
+    "mtime": 1784125938.67098,
+    "ast_hash": "c38b2dc5c456eda560d33b526c6a26db",
+    "semantic_hash": ""
+  },
+  "backend/src/db.js": {
+    "mtime": 1784458681.7762573,
+    "ast_hash": "ad59ea831061f44b5b40257f59bf5908",
+    "semantic_hash": ""
+  },
+  "backend/src/index.js": {
+    "mtime": 1784465885.575979,
+    "ast_hash": "d71548a0157b540158469f25a19247b3",
+    "semantic_hash": ""
+  },
+  "backend/src/middleware/auth.js": {
+    "mtime": 1784465879.2727523,
+    "ast_hash": "557e11ff7a6526b7d63e0796fae83e58",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/auth.js": {
+    "mtime": 1784465880.6941934,
+    "ast_hash": "9b35ace11b4e0d9789b2c8675e35504a",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/budgets.js": {
+    "mtime": 1784458766.6624985,
+    "ast_hash": "ca5d6c26f833b375050d1c918990e4e3",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/categories.js": {
+    "mtime": 1784458755.6499088,
+    "ast_hash": "df006fdbc7276e39ca06e29d8d1c46c3",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/debts.js": {
+    "mtime": 1784459152.385555,
+    "ast_hash": "387be6be342b0b9b3b3652cfc528e58f",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/goals.js": {
+    "mtime": 1784459153.7119446,
+    "ast_hash": "56cf551f2dd5cb877439428b0e874358",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/recurring.js": {
+    "mtime": 1784458804.3106468,
+    "ast_hash": "0629e754c8827a2d8cdd50fd7d57b76c",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/templates.js": {
+    "mtime": 1784458811.8219104,
+    "ast_hash": "3c1da905eaf65c7bdcd17d6633959716",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/transactions.js": {
+    "mtime": 1786276517.9077363,
+    "ast_hash": "90ca40134fc72ed1d2e9946212eef719",
+    "semantic_hash": ""
+  },
+  "backend/src/routes/wallets.js": {
+    "mtime": 1784458713.5397542,
+    "ast_hash": "45dc399a77a360e94fa503a9494cc27a",
+    "semantic_hash": ""
+  },
+  "backend/src/supabase.js": {
+    "mtime": 1784458681.2784235,
+    "ast_hash": "67f0018651347dbdfa674f355dfc57d3",
+    "semantic_hash": ""
+  },
+  "backend/vitest.config.js": {
+    "mtime": 1784126090.693298,
+    "ast_hash": "27b6411775b3818f5f55e015d9b294db",
+    "semantic_hash": ""
+  },
+  "e2e/budgets.spec.js": {
+    "mtime": 1784128067.1108181,
+    "ast_hash": "5a566e7c7575f1f90cb4c937b9602ead",
+    "semantic_hash": ""
+  },
+  "e2e/categories.spec.js": {
+    "mtime": 1784128688.891405,
+    "ast_hash": "98f7310d5a8d378561ec9677fa1e5698",
+    "semantic_hash": ""
+  },
+  "e2e/dashboard.spec.js": {
+    "mtime": 1784125177.3021436,
+    "ast_hash": "f395625a0072e9a66d5a8ceb3ab70380",
+    "semantic_hash": ""
+  },
+  "e2e/empty-pages.spec.js": {
+    "mtime": 1784128125.2967556,
+    "ast_hash": "c702508434f58689cbf49e3b0de19bda",
+    "semantic_hash": ""
+  },
+  "e2e/navigation.spec.js": {
+    "mtime": 1784125275.2562573,
+    "ast_hash": "88a9613f5c760e1b380d728db752c901",
+    "semantic_hash": ""
+  },
+  "e2e/transactions.spec.js": {
+    "mtime": 1784127975.9011834,
+    "ast_hash": "4dab71656e7bc4f6954a0b7106eefeaa",
+    "semantic_hash": ""
+  },
+  "e2e/wallets.spec.js": {
+    "mtime": 1784127971.9748375,
+    "ast_hash": "8cf9e96d6b7821c324eb8faeed0a0920",
+    "semantic_hash": ""
+  },
+  "frontend/.oxlintrc.json": {
+    "mtime": 1784044726.4984398,
+    "ast_hash": "5e6e3cea3e89137071c142dd7835b0ef",
+    "semantic_hash": ""
+  },
+  "frontend/package.json": {
+    "mtime": 1784124888.2693057,
+    "ast_hash": "be74eb0511cbe0f6c03dd26dfeb0d45d",
+    "semantic_hash": ""
+  },
+  "frontend/src/App.jsx": {
+    "mtime": 1784465919.0765483,
+    "ast_hash": "787d731d2372b6d8b51cd95a5bc5f45a",
+    "semantic_hash": ""
+  },
+  "frontend/src/components/Layout.jsx": {
+    "mtime": 1784628582.6303227,
+    "ast_hash": "72e795d7473a5c526a790830f53c6bb0",
+    "semantic_hash": ""
+  },
+  "frontend/src/components/ProtectedRoute.jsx": {
+    "mtime": 1784465911.4193282,
+    "ast_hash": "64bb50cf605732f45497ac5611120dc4",
+    "semantic_hash": ""
+  },
+  "frontend/src/context/AuthContext.jsx": {
+    "mtime": 1784630294.0252755,
+    "ast_hash": "8f3eb4ea754f804da8fb94942648f1b1",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/DummyContext.jsx": {
+    "mtime": 1784128537.8810754,
+    "ast_hash": "864b81b529bd9f44f5f3b6c85e1c6329",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useBudgets.js": {
+    "mtime": 1784128504.7593012,
+    "ast_hash": "b0d0ee5df6e14c2323dee2e53de70e6c",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useCategories.js": {
+    "mtime": 1784128503.887201,
+    "ast_hash": "27f8690a27cc4fa07fcde0019d605c33",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useDebts.js": {
+    "mtime": 1784128505.640568,
+    "ast_hash": "bb8bb9670df23d22f0f5df50b98bd79f",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useGoals.js": {
+    "mtime": 1784128506.4985259,
+    "ast_hash": "b30707d0584ceacaae7d0baebdd6c516",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useRecurring.js": {
+    "mtime": 1784128507.43171,
+    "ast_hash": "d750fbb788f59924a0ce02ec234ae54f",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useTemplates.js": {
+    "mtime": 1784128508.5871751,
+    "ast_hash": "8e5309a413932c819d37f431ddbad768",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useTransactions.js": {
+    "mtime": 1784128502.3801966,
+    "ast_hash": "aff93e92cae9544f6e08cb4f6e024000",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/hooks/useWallets.js": {
+    "mtime": 1784128503.040074,
+    "ast_hash": "a65e7a5437b067cfe39233c31f3eb3b0",
+    "semantic_hash": ""
+  },
+  "frontend/src/data/initialData.js": {
+    "mtime": 1784048139.8787737,
+    "ast_hash": "e31e3591c5ce38d1def04671b8c055e1",
+    "semantic_hash": ""
+  },
+  "frontend/src/main.jsx": {
+    "mtime": 1784465914.554679,
+    "ast_hash": "33be3fbc69aed4541ac769eb6606d72f",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Budgets.jsx": {
+    "mtime": 1784631303.9156604,
+    "ast_hash": "6d2d6d327f1eca13a6e49b18edba64d7",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Categories.jsx": {
+    "mtime": 1784631829.385875,
+    "ast_hash": "cb699535d38df33849b6190f3c9de185",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Dashboard.jsx": {
+    "mtime": 1784051190.008286,
+    "ast_hash": "0e183fa8cc51834dfc54a31d41e252d3",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Debts.jsx": {
+    "mtime": 1784632390.2933345,
+    "ast_hash": "a1bd2f95e1ac30c3f6cc98dd78d7fba7",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Goals.jsx": {
+    "mtime": 1784631224.681624,
+    "ast_hash": "34666d59c2d5c693f2e2aac23260795e",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Login.jsx": {
+    "mtime": 1784465910.5343812,
+    "ast_hash": "e9c7ae76187d607d1dc54ea4029122ed",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Recurring.jsx": {
+    "mtime": 1784631226.7734416,
+    "ast_hash": "decf7607105a376bca405e6d91ecc07d",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Reports.jsx": {
+    "mtime": 1784631304.7030022,
+    "ast_hash": "321afb9b741e154012b1c0da67da27c0",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Settings.jsx": {
+    "mtime": 1784631315.2106519,
+    "ast_hash": "812b2bfb979c2641c56815d7f5807e05",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Templates.jsx": {
+    "mtime": 1784631228.8346715,
+    "ast_hash": "b76ca8c0697cd6c43a7c09cea885935e",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Transactions.jsx": {
+    "mtime": 1786276577.9240465,
+    "ast_hash": "f109bbd7d9449a7f6588d1eedc70bb49",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/Wallets.jsx": {
+    "mtime": 1784631220.462897,
+    "ast_hash": "fd62aac1b792ed7bd823b214c25a456f",
+    "semantic_hash": ""
+  },
+  "frontend/src/services/api.js": {
+    "mtime": 1784465913.5499735,
+    "ast_hash": "6dad258010be9066667dbc892f544ca1",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/components/Layout.test.jsx": {
+    "mtime": 1784628916.2540305,
+    "ast_hash": "6a41f249ae1da1d3ef658e2cfe29fba8",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/integration/DummyContext.test.jsx": {
+    "mtime": 1784127383.6549244,
+    "ast_hash": "17a327200eb20d5bb913103cda905404",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/integration/FullAppFlow.test.jsx": {
+    "mtime": 1784127488.2613463,
+    "ast_hash": "4181953e70058d04d379202eda7cc614",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/integration/Navigation.test.jsx": {
+    "mtime": 1784127474.0797434,
+    "ast_hash": "1dcf9333e8e7e226d04ba742330b2824",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Budgets.test.jsx": {
+    "mtime": 1784126636.626011,
+    "ast_hash": "be7eb81f7e441164b26c62d4a781d1f0",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Categories.test.jsx": {
+    "mtime": 1784126230.954031,
+    "ast_hash": "4b93769e2ad1e15ea90ecab15eb803fe",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Dashboard.test.jsx": {
+    "mtime": 1784124884.4160447,
+    "ast_hash": "1a1997b0e5e0bedda61582c2241ba59f",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Debts.test.jsx": {
+    "mtime": 1784126235.8286166,
+    "ast_hash": "c6f3e6e0cf4eea290eb34ddecead96ef",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Goals.test.jsx": {
+    "mtime": 1784126238.5790977,
+    "ast_hash": "05a181a4ac9ddd4defaf1a53ef968de9",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Recurring.test.jsx": {
+    "mtime": 1784126344.4280202,
+    "ast_hash": "ffc9fda66218ad2b614c3193eea71d09",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Reports.test.jsx": {
+    "mtime": 1784126246.3161595,
+    "ast_hash": "da408abd86d2e76c35c2c819543cc0a3",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Settings.test.jsx": {
+    "mtime": 1784126358.841369,
+    "ast_hash": "a324172d1088a1b623c78105e88f0822",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Templates.test.jsx": {
+    "mtime": 1784126243.9865491,
+    "ast_hash": "a3c0103b74d728a459d6e5258fa70508",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Transactions.test.jsx": {
+    "mtime": 1784126226.5793188,
+    "ast_hash": "285298ab9ac62b805b711b607481c842",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/pages/Wallets.test.jsx": {
+    "mtime": 1784126878.9626217,
+    "ast_hash": "0b09e9834b7a4b3a004437def42cc755",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/setup.js": {
+    "mtime": 1784628758.0176866,
+    "ast_hash": "17b1ffacbc1c0582e2afb00e3157964d",
+    "semantic_hash": ""
+  },
+  "frontend/vite.config.js": {
+    "mtime": 1784124870.9677508,
+    "ast_hash": "915faa3cc0cfbb7cc97429fa3b229545",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1784465838.9992547,
+    "ast_hash": "34fefd7fb884daf5b0202d1209180b8c",
+    "semantic_hash": ""
+  },
+  "playwright.config.js": {
+    "mtime": 1784125129.8921041,
+    "ast_hash": "dcbdabcdec536a9d31cc634d24a6c6f0",
+    "semantic_hash": ""
+  },
+  "vercel.json": {
+    "mtime": 1784460518.1703758,
+    "ast_hash": "2b3102724512e1bb96fe27b44bb99126",
+    "semantic_hash": ""
+  },
+  "frontend/README.md": {
+    "mtime": 1784044726.7134688,
+    "ast_hash": "75eb386f17caf77fd6fe3ce1d90968ee",
+    "semantic_hash": ""
+  },
+  "frontend/index.html": {
+    "mtime": 1784633972.437105,
+    "ast_hash": "bf84c15417730c7ad6d59711d3f726e7",
+    "semantic_hash": ""
+  },
+  "frontend/public/favicon.svg": {
+    "mtime": 1784633736.746653,
+    "ast_hash": "e8d462f2ca8166ba31288193e12825ca",
+    "semantic_hash": ""
+  },
+  "frontend/public/icons.svg": {
+    "mtime": 1784044726.993722,
+    "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": ""
+  }
+}

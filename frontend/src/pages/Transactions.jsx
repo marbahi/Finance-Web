@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Plus, Funnel, PencilSimple, Trash, X, CaretUp, CaretDown } from '@phosphor-icons/react'
 import { useDummy } from '../data/DummyContext'
+import { Pagination } from '../components/ui/pagination'
 
 const today = new Date()
 const todayStr = today.toISOString().slice(0, 10)
@@ -44,6 +45,7 @@ export default function Transactions() {
   const [editId, setEditId] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const allCategories = useMemo(() => categories.map(c => c.name), [categories])
   const walletNames = useMemo(() => wallets.map(w => w.name), [wallets])
@@ -143,7 +145,14 @@ export default function Transactions() {
 
   function openAdd() {
     setEditId(null)
-    setForm({ date: todayStr, type: 'expense', note: '', memo: '', category: 'Makanan', subcategory: '', amount: '', wallet: 'BCA', transferWallet: 'Mandiri' })
+    const validCats = categories.filter(c => c.type === 'expense').map(c => c.name)
+    setForm({
+      date: todayStr, type: 'expense', note: '', memo: '',
+      category: validCats[0] || firstExpenseCat || '',
+      subcategory: '', amount: '',
+      wallet: firstWallet || '',
+      transferWallet: secondWallet || '',
+    })
     setShowModal(true)
   }
 
@@ -159,25 +168,49 @@ export default function Transactions() {
   }
 
   async function save() {
+    if (saving) return
+    const amountNum = parseInt(form.amount) || 0
+    if (!form.wallet || !walletNames.includes(form.wallet)) {
+      alert('Pilih dompet yang valid terlebih dahulu.')
+      return
+    }
+    if (!form.category) {
+      alert('Pilih kategori terlebih dahulu.')
+      return
+    }
+    if (!amountNum || amountNum <= 0) {
+      alert('Jumlah harus lebih dari 0.')
+      return
+    }
     const data = {
       date: form.date, type: form.type, note: form.note, memo: form.memo,
       category: form.category, subcategory: form.subcategory,
-      amount: parseInt(form.amount) || 0, wallet: form.wallet,
+      amount: amountNum, wallet: form.wallet,
       transferWallet: form.type === 'transfer' ? form.transferWallet : '',
     }
-    if (form.type === 'transfer' && !data.transferWallet) {
-      alert('Pilih dompet tujuan transfer terlebih dahulu.')
-      return
+    if (form.type === 'transfer') {
+      if (!data.transferWallet) {
+        alert('Pilih dompet tujuan transfer terlebih dahulu.')
+        return
+      }
+      if (data.transferWallet === data.wallet) {
+        alert('Dompet tujuan harus berbeda dari dompet asal.')
+        return
+      }
     }
+    setSaving(true)
     try {
       if (editId) {
         await updateTransaction(editId, data)
       } else {
         await createTransaction(data)
       }
+      setPage(1)
       setShowModal(false)
     } catch (e) {
       alert('Gagal menyimpan: ' + e.message)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -394,13 +427,13 @@ export default function Transactions() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-            <button key={p} onClick={() => setPage(p)}
-              className={`w-8 h-8 text-xs font-medium rounded-lg transition-colors ${
-                page === p ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'
-              }`}>{p}</button>
-          ))}
+        <div className="flex items-center justify-center overflow-x-auto py-1">
+          <Pagination
+            count={totalPages}
+            page={page}
+            onPageChange={(p) => setPage(p)}
+            label="Paginasi transaksi"
+          />
         </div>
       )}
 
@@ -427,17 +460,20 @@ export default function Transactions() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1.5 block">Tipe</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   {[
-                    { key: 'expense', label: 'Pengeluaran' },
-                    { key: 'income', label: 'Pemasukan' },
-                    { key: 'transfer', label: 'Transfer' },
+                    { key: 'expense', short: 'Keluar', label: 'Pengeluaran' },
+                    { key: 'income', short: 'Masuk', label: 'Pemasukan' },
+                    { key: 'transfer', short: 'Transfer', label: 'Transfer' },
                   ].map(t => (
                     <button key={t.key} onClick={() => onTypeChange(t.key)}
-                      className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                      className={`min-w-0 px-2 sm:px-3 py-2 text-[13px] sm:text-sm rounded-lg border transition-colors truncate ${
                         form.type === t.key ? 'border-gray-900 bg-gray-50 text-gray-900 font-medium'
                           : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                      }`}>{t.label}</button>
+                      }`}>
+                      <span className="sm:hidden">{t.short}</span>
+                      <span className="hidden sm:inline">{t.label}</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -495,8 +531,8 @@ export default function Transactions() {
               )}
             </div>
             <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Batal</button>
-              <button onClick={save} className="px-4 py-2 text-sm text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">Simpan</button>
+              <button onClick={() => setShowModal(false)} disabled={saving} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">Batal</button>
+              <button onClick={save} disabled={saving} className="px-4 py-2 text-sm text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50">{saving ? 'Menyimpan...' : 'Simpan'}</button>
             </div>
           </div>
         </div>

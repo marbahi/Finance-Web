@@ -116,11 +116,22 @@ router.post('/', async (req, res) => {
   const subId = sub.data && sub.data.length > 0 ? sub.data[0].id : null
   const twId = tw.data && tw.data.length > 0 ? tw.data[0].id : -1
 
-  const typeNum = Object.keys(TRANS_TYPES).find(k => TRANS_TYPES[k] === type) || 1
-  if (Number(typeNum) === 2 && twId <= 0) {
+  const typeNumRaw = Object.keys(TRANS_TYPES).find(k => TRANS_TYPES[k] === type)
+  const typeNum = typeNumRaw !== undefined ? Number(typeNumRaw) : 1
+  if (wallet && walletId <= 0) {
+    return res.status(400).json({ error: `Dompet "${wallet}" tidak ditemukan. Pilih dompet yang tersedia.` })
+  }
+  if (!wallet || walletId <= 0) {
+    return res.status(400).json({ error: 'Dompet wajib dipilih.' })
+  }
+  if (typeNum === 2 && twId <= 0) {
     return res.status(400).json({ error: 'Dompet tujuan transfer tidak ditemukan. Periksa nama dompet tujuan.' })
   }
-  const dbAmount = (typeNum === 1 ? -1 : 1) * Math.abs(Number(amount) || 0) * 100
+  const amountNum = Math.abs(Number(amount) || 0)
+  if (!amountNum || amountNum <= 0) {
+    return res.status(400).json({ error: 'Jumlah harus lebih dari 0.' })
+  }
+  const dbAmount = (typeNum === 1 ? -1 : 1) * amountNum * 100
   const dateTime = date ? new Date(date + 'T00:00:00').getTime() : Date.now()
 
   const { data, error } = await supabase.from('trans').insert({
@@ -135,7 +146,7 @@ router.post('/', async (req, res) => {
     subcategory_id: subId || 0,
     wallet_id: walletId,
     transfer_wallet_id: twId,
-    trans_amount: typeNum === 2 ? Math.abs(Number(amount)) : 0,
+    trans_amount: typeNum === 2 ? amountNum * 100 : 0,
     debt_id: 0,
     debt_trans_id: 0,
     budget_id: req.body.budget_id || null,
@@ -146,7 +157,13 @@ router.post('/', async (req, res) => {
     return res.status(500).json({ error: error?.message || 'Insert returned no data' })
   }
 
-  await updateWalletBalance(typeNum, dbAmount, walletId, twId, 'apply')
+  try {
+    await updateWalletBalance(typeNum, dbAmount, walletId, twId, 'apply')
+  } catch (e) {
+    // Rollback: hapus transaksi yang baru dibuat agar tidak timpang dengan saldo
+    await supabase.from('trans').delete().eq('id', data.id)
+    return res.status(500).json({ error: e.message })
+  }
 
   res.status(201).json(await transform(data))
 })
@@ -155,8 +172,6 @@ router.put('/:id', async (req, res) => {
   const { data: existingArr } = await supabase.from('trans').select('*').eq('id', req.params.id)
   if (!existingArr || existingArr.length === 0) return res.status(404).json({ error: 'Transaction not found' })
   const existing = existingArr[0]
-
-  await updateWalletBalance(existing.type, existing.amount, existing.wallet_id, existing.transfer_wallet_id, 'reverse')
 
   const { date, note, memo, type, amount, category, subcategory, wallet, transferWallet } = req.body
 
@@ -171,13 +186,21 @@ router.put('/:id', async (req, res) => {
       : Promise.resolve({ data: null }),
   ])
 
-  const typeNum = type ? (Object.keys(TRANS_TYPES).find(k => TRANS_TYPES[k] === type) || existing.type) : existing.type
+  const typeNumRaw = type ? Object.keys(TRANS_TYPES).find(k => TRANS_TYPES[k] === type) : undefined
+  const typeNum = type ? (typeNumRaw !== undefined ? Number(typeNumRaw) : existing.type) : existing.type
+  if (wallet && (!w.data || w.data.length === 0)) {
+    return res.status(400).json({ error: `Dompet "${wallet}" tidak ditemukan. Pilih dompet yang tersedia.` })
+  }
+  const amountNum = amount !== undefined ? Math.abs(Number(amount)) : Math.abs(Number(existing.amount)) / 100
+  if (amount !== undefined && (!amountNum || amountNum <= 0)) {
+    return res.status(400).json({ error: 'Jumlah harus lebih dari 0.' })
+  }
   const dbAmount = amount !== undefined
-    ? (Number(typeNum) === 1 ? -1 : 1) * Math.abs(Number(amount)) * 100
+    ? (Number(typeNum) === 1 ? -1 : 1) * amountNum * 100
     : existing.amount
   const dateTime = date ? new Date(date + 'T00:00:00').getTime() : existing.date_time
 
-  const wId = w.data && w.data.length > 0 ? w.data[0].id : existing.wallet_id
+  const wId = w.data && w.data.length > 0 ? w.data[0].id : (wallet ? existing.wallet_id : existing.wallet_id)
   const catId = cat.data && cat.data.length > 0 ? cat.data[0].id : existing.category_id
   const subId = sub.data !== null ? (sub.data.length > 0 ? sub.data[0].id : 0) : existing.subcategory_id
   const twId = tw.data !== null ? (tw.data.length > 0 ? tw.data[0].id : -1) : existing.transfer_wallet_id
@@ -185,6 +208,12 @@ router.put('/:id', async (req, res) => {
   if (Number(typeNum) === 2 && twId <= 0) {
     return res.status(400).json({ error: 'Dompet tujuan transfer tidak ditemukan. Periksa nama dompet tujuan.' })
   }
+  if (Number(typeNum) === 2 && wId === twId) {
+    return res.status(400).json({ error: 'Dompet tujuan harus berbeda dari dompet asal.' })
+  }
+
+  // Saldo: reverse lama dulu, baru apply baru. Semua validasi sudah lolos di atas.
+  await updateWalletBalance(existing.type, existing.amount, existing.wallet_id, existing.transfer_wallet_id, 'reverse')
 
   const { error: updateError } = await supabase.from('trans').update({
     note: note ?? existing.note,
@@ -196,14 +225,26 @@ router.put('/:id', async (req, res) => {
     subcategory_id: subId,
     wallet_id: wId,
     transfer_wallet_id: twId,
+    trans_amount: Number(typeNum) === 2 ? Math.abs(Number(dbAmount)) : 0,
   }).eq('id', req.params.id)
 
   if (updateError) {
     console.error('Supabase update error:', updateError.message)
+    // Kompensasi: kembalikan saldo lama karena update gagal setelah reverse
+    try {
+      await updateWalletBalance(existing.type, existing.amount, existing.wallet_id, existing.transfer_wallet_id, 'apply')
+    } catch (e) {
+      console.error('[balance] kompensasi gagal:', e.message)
+    }
     return res.status(500).json({ error: updateError.message })
   }
 
-  await updateWalletBalance(typeNum, dbAmount, wId, twId, 'apply')
+  try {
+    await updateWalletBalance(typeNum, dbAmount, wId, twId, 'apply')
+  } catch (e) {
+    console.error('[balance] apply gagal setelah update:', e.message)
+    return res.status(500).json({ error: e.message })
+  }
 
   const { data: updated, error: selectError } = await supabase.from('trans').select('*').eq('id', req.params.id)
   if (selectError || !updated || updated.length === 0) {
