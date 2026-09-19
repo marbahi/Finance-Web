@@ -1,5 +1,17 @@
 {
   "0": "Transactions.jsx",
   "1": "transactions.js",
-  "2": "graphify.js"
+  "2": "graphify.js",
+  "3": "dependencies",
+  "4": "package.json",
+  "5": "pagination.jsx",
+  "6": "devDependencies",
+  "7": "jsdom",
+  "8": "@testing-library/jest-dom",
+  "9": "@testing-library/react",
+  "10": "@types/react",
+  "11": "@types/react-dom",
+  "12": "vite",
+  "13": "@vitejs/plugin-react",
+  "14": "vitest"
 }

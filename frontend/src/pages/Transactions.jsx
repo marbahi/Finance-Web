@@ -276,14 +276,14 @@ export default function Transactions() {
         </div>
 
         {showFilters && (
-          <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-2 gap-2">
             <select value={filterCategory} onChange={e => { setFilterCategory(e.target.value); setPage(1) }}
-              className="w-full min-w-0 truncate px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+              className="w-full min-w-0 truncate px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
               <option value="all">Semua Kategori</option>
               {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <select value={filterWallet} onChange={e => { setFilterWallet(e.target.value); setPage(1) }}
-              className="w-full min-w-0 truncate px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+              className="w-full min-w-0 truncate px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
               <option value="all">Semua Dompet</option>
               {walletNames.map(w => <option key={w} value={w}>{w}</option>)}
             </select>
@@ -291,7 +291,7 @@ export default function Transactions() {
         )}
 
         {/* Period Buttons */}
-        <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-fit max-w-full overflow-x-auto">
+        <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-full">
           {[
             { key: 'all', label: 'Semua' },
             { key: 'today', label: 'Hari Ini' },
@@ -300,7 +300,7 @@ export default function Transactions() {
             { key: 'custom', label: 'Kustom' },
           ].map(p => (
             <button key={p.key} onClick={() => { setPeriod(p.key); setPage(1) }}
-              className={`shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`flex-1 min-w-0 whitespace-nowrap px-1 py-1.5 text-xs font-medium rounded-md transition-colors text-center ${
                 period === p.key ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-800'
               }`}>{p.label}</button>
           ))}
@@ -308,10 +308,10 @@ export default function Transactions() {
         {period === 'custom' && (
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
             <input type="date" value={customStart} onChange={e => { setCustomStart(e.target.value); setPage(1) }}
-              className="w-full min-w-0 px-2 sm:px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
-            <span className="text-xs text-gray-400 text-center">sampai</span>
+              className="w-full min-w-0 px-2 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+            <span className="text-sm text-gray-400 text-center shrink-0">–</span>
             <input type="date" value={customEnd} onChange={e => { setCustomEnd(e.target.value); setPage(1) }}
-              className="w-full min-w-0 px-2 sm:px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+              className="w-full min-w-0 px-2 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
           </div>
         )}
       </div>

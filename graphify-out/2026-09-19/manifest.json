@@ -150,8 +150,8 @@
     "semantic_hash": ""
   },
   "backend/src/routes/transactions.js": {
-    "mtime": 1786276517.9077363,
-    "ast_hash": "90ca40134fc72ed1d2e9946212eef719",
+    "mtime": 1789795794.0077074,
+    "ast_hash": "4eeecfc57dc89426bd324d9ae774c41f",
     "semantic_hash": ""
   },
   "backend/src/routes/wallets.js": {
@@ -210,8 +210,8 @@
     "semantic_hash": ""
   },
   "frontend/package.json": {
-    "mtime": 1784124888.2693057,
-    "ast_hash": "be74eb0511cbe0f6c03dd26dfeb0d45d",
+    "mtime": 1789796412.8981316,
+    "ast_hash": "496fe2681a4f54c218d9433005894e58",
     "semantic_hash": ""
   },
   "frontend/src/App.jsx": {
@@ -340,8 +340,8 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/Transactions.jsx": {
-    "mtime": 1786276577.9240465,
-    "ast_hash": "f109bbd7d9449a7f6588d1eedc70bb49",
+    "mtime": 1789796509.173708,
+    "ast_hash": "d0666b944caa5b8c1a1f5575d0a0f96e",
     "semantic_hash": ""
   },
   "frontend/src/pages/Wallets.jsx": {
@@ -472,6 +472,11 @@
   "frontend/public/icons.svg": {
     "mtime": 1784044726.993722,
     "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": ""
+  },
+  "frontend/src/components/ui/pagination.jsx": {
+    "mtime": 1789796454.5734026,
+    "ast_hash": "fff273f8c46843c4bcf094ace2952ad1",
     "semantic_hash": ""
   }
 }

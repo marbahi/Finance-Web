@@ -1,16 +1,16 @@
 # Graph Report - finance-monitor  (2026-09-19)
 
 ## Corpus Check
-- 93 files · ~34,733 words
+- 93 files · ~34,764 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 79 nodes · 85 edges · 15 communities (6 shown, 9 thin omitted)
+- 79 nodes · 83 edges · 15 communities (6 shown, 9 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `09f9ca8c`
+- Built from commit: `76896744`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -33,15 +33,15 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `scripts` - 7 edges
-2. `Pagination()` - 5 edges
-3. `Transactions()` - 5 edges
+2. `Transactions()` - 5 edges
+3. `Pagination()` - 4 edges
 4. `usePagination()` - 3 edges
-5. `lookupName()` - 2 edges
-6. `transform()` - 2 edges
-7. `@phosphor-icons/react` - 2 edges
-8. `@tailwindcss/vite` - 2 edges
-9. `motion` - 2 edges
-10. `react` - 2 edges
+5. `getMonthRange()` - 2 edges
+6. `getYearRange()` - 2 edges
+7. `formatRp()` - 2 edges
+8. `formatDate()` - 2 edges
+9. `lookupName()` - 2 edges
+10. `transform()` - 2 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -76,7 +76,7 @@ Cohesion: 0.40
 Nodes (5): devDependencies, oxlint, @testing-library/user-event, oxlint, @testing-library/user-event
 
 ## Knowledge Gaps
-- **36 isolated node(s):** `router`, `TRANS_TYPES`, `name`, `private`, `version` (+31 more)
+- **36 isolated node(s):** `today`, `todayStr`, `router`, `TRANS_TYPES`, `name` (+31 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -87,7 +87,7 @@ _Questions this graph is uniquely positioned to answer:_
   _High betweenness centrality (0.253) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
   _High betweenness centrality (0.213) - this node is a cross-community bridge._
-- **What connects `router`, `TRANS_TYPES`, `name` to the rest of the system?**
+- **What connects `today`, `todayStr`, `router` to the rest of the system?**
   _36 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
