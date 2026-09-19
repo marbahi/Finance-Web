@@ -253,35 +253,37 @@ export default function Transactions() {
 
       {/* Filter Bar */}
       <div className="space-y-3">
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-3 sm:flex-wrap">
           <input type="text" placeholder="Cari..." value={search}
             onChange={e => { setSearch(e.target.value); setPage(1) }}
-            className="flex-1 min-w-[200px] px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
-          <select value={filterType} onChange={e => { setFilterType(e.target.value); setPage(1) }}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
-            <option value="all">Semua Tipe</option>
-            <option value="expense">Pengeluaran</option>
-            <option value="income">Pemasukan</option>
-            <option value="transfer">Transfer</option>
-          </select>
-          <button onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${
-              showFilters ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'
-            }`}>
-            <Funnel size={14} />
-            Filter
-          </button>
+            className="w-full sm:flex-1 sm:min-w-[200px] px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+          <div className="grid grid-cols-2 gap-2 sm:contents">
+            <select value={filterType} onChange={e => { setFilterType(e.target.value); setPage(1) }}
+              className="w-full min-w-0 truncate px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+              <option value="all">Semua Tipe</option>
+              <option value="expense">Pengeluaran</option>
+              <option value="income">Pemasukan</option>
+              <option value="transfer">Transfer</option>
+            </select>
+            <button onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${
+                showFilters ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'
+              }`}>
+              <Funnel size={14} />
+              Filter
+            </button>
+          </div>
         </div>
 
         {showFilters && (
-          <div className="flex items-center gap-3 flex-wrap p-3 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg">
             <select value={filterCategory} onChange={e => { setFilterCategory(e.target.value); setPage(1) }}
-              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+              className="w-full min-w-0 truncate px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
               <option value="all">Semua Kategori</option>
               {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <select value={filterWallet} onChange={e => { setFilterWallet(e.target.value); setPage(1) }}
-              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
+              className="w-full min-w-0 truncate px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300">
               <option value="all">Semua Dompet</option>
               {walletNames.map(w => <option key={w} value={w}>{w}</option>)}
             </select>
@@ -289,7 +291,7 @@ export default function Transactions() {
         )}
 
         {/* Period Buttons */}
-        <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-fit">
+        <div className="flex gap-1 bg-white border border-gray-200 rounded-lg p-0.5 w-fit max-w-full overflow-x-auto">
           {[
             { key: 'all', label: 'Semua' },
             { key: 'today', label: 'Hari Ini' },
@@ -298,18 +300,18 @@ export default function Transactions() {
             { key: 'custom', label: 'Kustom' },
           ].map(p => (
             <button key={p.key} onClick={() => { setPeriod(p.key); setPage(1) }}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+              className={`shrink-0 whitespace-nowrap px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 period === p.key ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-800'
               }`}>{p.label}</button>
           ))}
         </div>
         {period === 'custom' && (
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
             <input type="date" value={customStart} onChange={e => { setCustomStart(e.target.value); setPage(1) }}
-              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
-            <span className="text-xs text-gray-400">sampai</span>
+              className="w-full min-w-0 px-2 sm:px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+            <span className="text-xs text-gray-400 text-center">sampai</span>
             <input type="date" value={customEnd} onChange={e => { setCustomEnd(e.target.value); setPage(1) }}
-              className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
+              className="w-full min-w-0 px-2 sm:px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
           </div>
         )}
       </div>
