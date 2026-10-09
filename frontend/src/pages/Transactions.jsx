@@ -174,7 +174,7 @@ export default function Transactions() {
       alert('Pilih dompet yang valid terlebih dahulu.')
       return
     }
-    if (!form.category) {
+    if (form.type !== 'transfer' && !form.category) {
       alert('Pilih kategori terlebih dahulu.')
       return
     }
@@ -184,7 +184,8 @@ export default function Transactions() {
     }
     const data = {
       date: form.date, type: form.type, note: form.note, memo: form.memo,
-      category: form.category, subcategory: form.subcategory,
+      category: form.type === 'transfer' ? '' : form.category,
+      subcategory: form.type === 'transfer' ? '' : form.subcategory,
       amount: amountNum, wallet: form.wallet,
       transferWallet: form.type === 'transfer' ? form.transferWallet : '',
     }
@@ -338,7 +339,7 @@ export default function Transactions() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{t.note}</p>
-                    <p className="text-xs text-gray-400 truncate">{t.category}{t.subcategory ? ` — ${t.subcategory}` : ''}</p>
+                    <p className="text-xs text-gray-400 truncate">{t.category || (t.type === 'transfer' ? 'Transfer' : '')}{t.subcategory ? ` — ${t.subcategory}` : ''}</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
@@ -400,7 +401,7 @@ export default function Transactions() {
                       <div className="text-sm font-medium text-gray-900">{t.note}</div>
                       {t.memo && <div className="text-xs text-gray-400">{t.memo}</div>}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">{t.category}{t.subcategory ? ` — ${t.subcategory}` : ''}</td>
+                    <td className="px-4 py-3 text-xs text-gray-500">{t.category || (t.type === 'transfer' ? 'Transfer' : '')}{t.subcategory ? ` — ${t.subcategory}` : ''}</td>
                     <td className="px-4 py-3 text-xs">
                       <span className="text-gray-500">{t.wallet}</span>
                       {t.transferWallet && <span className="text-gray-400"> → {t.transferWallet}</span>}
@@ -491,6 +492,7 @@ export default function Transactions() {
                   onChange={e => setForm(f => ({ ...f, memo: e.target.value }))}
                   className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
               </div>
+              {form.type !== 'transfer' && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-gray-700 mb-1.5 block">Kategori</label>
@@ -508,6 +510,7 @@ export default function Transactions() {
                   </select>
                 </div>
               </div>
+              )}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1.5 block">Jumlah</label>
                 <input type="number" placeholder="0" value={form.amount}

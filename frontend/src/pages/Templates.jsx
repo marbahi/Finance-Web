@@ -7,11 +7,12 @@ function formatRp(n) {
 }
 
 export default function Templates() {
-  const { loading, templates, categories, wallets, createTemplate, updateTemplate, deleteTemplate } = useDummy()
+  const { loading, templates, categories, wallets, createTemplate, updateTemplate, deleteTemplate, createTransaction } = useDummy()
   const [showModal, setShowModal] = useState(false)
   const [editId, setEditId] = useState(null)
   const [deleteId, setDeleteId] = useState(null)
   const [search, setSearch] = useState('')
+  const [usingId, setUsingId] = useState(null)
 
   const categoryList = useMemo(() => categories.map(c => c.name), [categories])
   const subcategoryList = useMemo(() => {
@@ -69,6 +70,28 @@ export default function Templates() {
       setDeleteId(null)
     } catch (e) {
       alert('Gagal menghapus: ' + e.message)
+    }
+  }
+
+  async function applyTemplate(t) {
+    if (usingId) return
+    setUsingId(t.id)
+    try {
+      await createTransaction({
+        date: new Date().toISOString().slice(0, 10),
+        type: t.type,
+        note: t.name,
+        memo: t.memo || '',
+        category: t.category || '',
+        subcategory: t.subcategory || '',
+        amount: t.amount,
+        wallet: t.wallet,
+        transferWallet: '',
+      })
+    } catch (e) {
+      alert('Gagal memakai template: ' + e.message)
+    } finally {
+      setUsingId(null)
     }
   }
 
@@ -140,10 +163,10 @@ export default function Templates() {
               {t.memo && <div><span className="text-gray-400">Memo:</span> {t.memo}</div>}
             </div>
 
-            <button
-              className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <button onClick={() => applyTemplate(t)} disabled={usingId === t.id}
+              className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
               <Copy size={14} />
-              Gunakan Template
+              {usingId === t.id ? 'Memakai...' : 'Gunakan Template'}
             </button>
           </div>
         ))}

@@ -22,7 +22,13 @@ describe('Wallets', () => {
     render(<MemoryRouter><Wallets /></MemoryRouter>)
     expect(screen.getByText('Total Saldo')).toBeInTheDocument()
     expect(screen.getByText('Total Aset')).toBeInTheDocument()
-    expect(screen.getByText('Total Hutang Kartu')).toBeInTheDocument()
+    expect(screen.getByText('Total Hutang')).toBeInTheDocument()
+  })
+
+  it('tidak menampilkan saldo awal dan bar progres', () => {
+    render(<MemoryRouter><Wallets /></MemoryRouter>)
+    expect(screen.queryByText('Dari saldo awal')).not.toBeInTheDocument()
+    expect(screen.queryByText('Saldo Awal')).not.toBeInTheDocument()
   })
 
   it('menampilkan daftar dompet', () => {

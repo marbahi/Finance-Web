@@ -8,12 +8,12 @@ vi.mock('../../data/DummyContext', () => ({
 }))
 
 describe('Settings', () => {
-  it('menampilkan navigasi sidebar', () => {
+  it('menampilkan section pengaturan', () => {
     render(<MemoryRouter><Settings /></MemoryRouter>)
-    expect(screen.getByText('Umum')).toBeInTheDocument()
+    expect(screen.getByText('Preferensi')).toBeInTheDocument()
     expect(screen.getByText('Profil')).toBeInTheDocument()
     expect(screen.getByText('Notifikasi')).toBeInTheDocument()
-    expect(screen.getByText('Data')).toBeInTheDocument()
+    expect(screen.getByText('Kelola Data')).toBeInTheDocument()
     expect(screen.getByText('Tentang')).toBeInTheDocument()
   })
 

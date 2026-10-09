@@ -21,7 +21,7 @@ export default function Wallets() {
   const [selectedWallet, setSelectedWallet] = useState(null)
 
   const [form, setForm] = useState({
-    name: '', type: 'cash', balance: '', initial: '', color: '#2563eb',
+    name: '', type: 'cash', balance: '', color: '#2563eb',
     active: true, exclude: false, limit: '', dueDate: '', statementDate: '',
   })
 
@@ -32,14 +32,14 @@ export default function Wallets() {
 
   function openAdd() {
     setEditId(null)
-    setForm({ name: '', type: 'cash', balance: '', initial: '', color: '#2563eb', active: true, exclude: false, limit: '', dueDate: '', statementDate: '' })
+    setForm({ name: '', type: 'cash', balance: '', color: '#2563eb', active: true, exclude: false, limit: '', dueDate: '', statementDate: '' })
     setShowModal(true)
   }
 
   function openEdit(w) {
     setEditId(w.id)
     setForm({
-      name: w.name, type: w.type, balance: String(w.balance), initial: String(w.initial),
+      name: w.name, type: w.type, balance: String(w.balance),
       color: w.color, active: w.active, exclude: w.exclude, limit: String(w.limit || ''),
       dueDate: w.dueDate || '', statementDate: w.statementDate || '',
     })
@@ -49,7 +49,7 @@ export default function Wallets() {
   async function save() {
     const data = {
       name: form.name, type: form.type, balance: parseInt(form.balance) || 0,
-      initial: parseInt(form.initial) || 0, color: form.color, active: form.active, exclude: form.exclude,
+      initial: 0, color: form.color, active: form.active, exclude: form.exclude,
       limit: form.type === 'credit' ? parseInt(form.limit) || 0 : undefined,
       dueDate: form.type === 'credit' ? form.dueDate : undefined,
       statementDate: form.type === 'credit' ? form.statementDate : undefined,
@@ -121,7 +121,7 @@ export default function Wallets() {
           <div className="text-2xl font-semibold text-emerald-600 mt-1">{formatRp(totalAssets)}</div>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-5">
-          <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Hutang Kartu</span>
+          <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Hutang</span>
           <div className="text-2xl font-semibold text-rose-600 mt-1">{formatRp(totalCredit)}</div>
         </div>
       </div>
@@ -195,19 +195,6 @@ export default function Wallets() {
                 </div>
               )}
 
-              {/* Progress from initial */}
-              {w.type !== 'credit' && (
-                <div className="px-5 pb-4 pt-1">
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
-                    <span>Dari saldo awal</span>
-                    <span>{formatRp(w.initial)}</span>
-                  </div>
-                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all"
-                      style={{ width: Math.min((w.balance / (w.initial || 1)) * 100, 100) + '%', backgroundColor: w.color }} />
-                  </div>
-                </div>
-              )}
             </div>
           )
         })}
@@ -260,19 +247,11 @@ export default function Wallets() {
                   })}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Saldo Saat Ini</label>
-                  <input type="number" placeholder="0" value={form.balance}
-                    onChange={e => setForm(f => ({ ...f, balance: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-1.5 block">Saldo Awal</label>
-                  <input type="number" placeholder="0" value={form.initial}
-                    onChange={e => setForm(f => ({ ...f, initial: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
-                </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Saldo Saat Ini</label>
+                <input type="number" placeholder="0" value={form.balance}
+                  onChange={e => setForm(f => ({ ...f, balance: e.target.value }))}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-300" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1.5 block">Warna</label>

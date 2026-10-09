@@ -3,8 +3,7 @@ import { readFileSync } from 'fs'
 import pkg from 'pg'
 const { Client } = pkg
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://tjdnccrinsnaosxfqcyw.supabase.co'
-const PROJECT_REF = 'tjdnccrinsnaosxfqcyw'
+const PROJECT_REF = process.env.SUPABASE_PROJECT_REF || 'your-project-ref'
 
 async function getDbUrl() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL

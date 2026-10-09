@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
+import { AuthProvider } from '../../context/AuthContext'
 import Layout from '../../components/Layout'
 import Dashboard from '../../pages/Dashboard'
 import Wallets from '../../pages/Wallets'
@@ -35,15 +36,23 @@ vi.mock('../../data/DummyContext', () => ({
 }))
 
 describe('Full App Flow', () => {
+  // Lihat Navigation.test.jsx: sidebar ganda di jsdom, pakai link pertama.
+  function clickNav(label) {
+    const links = screen.getAllByRole('link', { name: label })
+    fireEvent.click(links[0])
+  }
+
   function renderApp(initialRoute = '/') {
     return render(
       <MemoryRouter initialEntries={[initialRoute]}>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="wallets" element={<Wallets />} />
-          </Route>
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="wallets" element={<Wallets />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
       </MemoryRouter>
     )
   }
@@ -53,11 +62,11 @@ describe('Full App Flow', () => {
 
     expect(screen.getAllByText('Dashboard').length).toBeGreaterThanOrEqual(1)
 
-    fireEvent.click(screen.getByText('Dompet'))
+    clickNav('Dompet')
 
     expect(screen.getByText('Total Saldo')).toBeInTheDocument()
     expect(screen.getByText('Total Aset')).toBeInTheDocument()
-    expect(screen.getByText('Total Hutang Kartu')).toBeInTheDocument()
+    expect(screen.getByText('Total Hutang')).toBeInTheDocument()
   })
 
   it('menampilkan data dompet setelah navigasi', () => {
@@ -71,11 +80,11 @@ describe('Full App Flow', () => {
   it('sidebar tetap terlihat setelah navigasi', () => {
     renderApp('/')
 
-    expect(screen.getByText('Finance Monitor')).toBeInTheDocument()
+    expect(screen.getAllByText('Finance Monitor').length).toBeGreaterThanOrEqual(1)
 
-    fireEvent.click(screen.getByText('Dompet'))
+    clickNav('Dompet')
 
-    expect(screen.getByText('Finance Monitor')).toBeInTheDocument()
+    expect(screen.getAllByText('Finance Monitor').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('Dashboard').length).toBeGreaterThanOrEqual(1)
     expect(screen.getAllByText('Dompet').length).toBeGreaterThanOrEqual(1)
   })
