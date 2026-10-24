@@ -12,6 +12,5 @@
   "10": "@types/react",
   "11": "@types/react-dom",
   "12": "vite",
-  "13": "@vitejs/plugin-react",
-  "14": "vitest"
+  "13": "@vitejs/plugin-react"
 }

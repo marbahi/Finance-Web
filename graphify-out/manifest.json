@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "backend/migrate.mjs": {
-    "mtime": 1784459072.024923,
-    "ast_hash": "071b10dd527d87d89e2de961378797db",
+    "mtime": 1791550765.588942,
+    "ast_hash": "5f3009ddb253a19534e0327c45239a92",
     "semantic_hash": ""
   },
   "backend/migrations/001_initial.sql": {
@@ -325,8 +325,8 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/Reports.jsx": {
-    "mtime": 1784631304.7030022,
-    "ast_hash": "321afb9b741e154012b1c0da67da27c0",
+    "mtime": 1791557471.877274,
+    "ast_hash": "b0519f6b4e81091ea12a800961b756ea",
     "semantic_hash": ""
   },
   "frontend/src/pages/Settings.jsx": {
@@ -335,18 +335,18 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/Templates.jsx": {
-    "mtime": 1784631228.8346715,
-    "ast_hash": "b76ca8c0697cd6c43a7c09cea885935e",
+    "mtime": 1791554443.796616,
+    "ast_hash": "71a8db1492bac145a43b719950cf5671",
     "semantic_hash": ""
   },
   "frontend/src/pages/Transactions.jsx": {
-    "mtime": 1789797570.2603395,
-    "ast_hash": "a0c3f29ae7f18d2bb712167d01773955",
+    "mtime": 1791550810.230451,
+    "ast_hash": "010848587e9a8b419c239867236fc6ac",
     "semantic_hash": ""
   },
   "frontend/src/pages/Wallets.jsx": {
-    "mtime": 1784631220.462897,
-    "ast_hash": "fd62aac1b792ed7bd823b214c25a456f",
+    "mtime": 1791554097.8157666,
+    "ast_hash": "04904421066cfb54bb8f1b75d281016c",
     "semantic_hash": ""
   },
   "frontend/src/services/api.js": {
@@ -365,18 +365,18 @@
     "semantic_hash": ""
   },
   "frontend/src/test/integration/FullAppFlow.test.jsx": {
-    "mtime": 1784127488.2613463,
-    "ast_hash": "4181953e70058d04d379202eda7cc614",
+    "mtime": 1791558771.232976,
+    "ast_hash": "716652f1f111c7928224781aab5e9dbf",
     "semantic_hash": ""
   },
   "frontend/src/test/integration/Navigation.test.jsx": {
-    "mtime": 1784127474.0797434,
-    "ast_hash": "1dcf9333e8e7e226d04ba742330b2824",
+    "mtime": 1791558619.961255,
+    "ast_hash": "598a2dc61fa5b42787716dd052ba7f4f",
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Budgets.test.jsx": {
-    "mtime": 1784126636.626011,
-    "ast_hash": "be7eb81f7e441164b26c62d4a781d1f0",
+    "mtime": 1791557849.4714584,
+    "ast_hash": "88ad8a556daa5475b6ac5c7806cad724",
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Categories.test.jsx": {
@@ -405,28 +405,28 @@
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Reports.test.jsx": {
-    "mtime": 1784126246.3161595,
-    "ast_hash": "da408abd86d2e76c35c2c819543cc0a3",
+    "mtime": 1791557490.6600246,
+    "ast_hash": "ab838fd9fed116752fe0d5dbb517c937",
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Settings.test.jsx": {
-    "mtime": 1784126358.841369,
-    "ast_hash": "a324172d1088a1b623c78105e88f0822",
+    "mtime": 1791557841.373493,
+    "ast_hash": "478e3102701a7c45d6f5de6efa980e0e",
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Templates.test.jsx": {
-    "mtime": 1784126243.9865491,
-    "ast_hash": "a3c0103b74d728a459d6e5258fa70508",
+    "mtime": 1791554257.239788,
+    "ast_hash": "6d1149a96056f0ed1fdf19ee82b0828e",
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Transactions.test.jsx": {
-    "mtime": 1784126226.5793188,
-    "ast_hash": "285298ab9ac62b805b711b607481c842",
+    "mtime": 1791550810.2324605,
+    "ast_hash": "371d9a7ef03d6e8584120e03f02bd4d5",
     "semantic_hash": ""
   },
   "frontend/src/test/pages/Wallets.test.jsx": {
-    "mtime": 1784126878.9626217,
-    "ast_hash": "0b09e9834b7a4b3a004437def42cc755",
+    "mtime": 1791554111.8357277,
+    "ast_hash": "6de598ba3f8c4d95c7bbe1231c1addb1",
     "semantic_hash": ""
   },
   "frontend/src/test/setup.js": {
@@ -477,6 +477,16 @@
   "frontend/src/components/ui/pagination.jsx": {
     "mtime": 1789796454.5734026,
     "ast_hash": "fff273f8c46843c4bcf094ace2952ad1",
+    "semantic_hash": ""
+  },
+  "frontend/src/test/utils/reportCsv.test.js": {
+    "mtime": 1791557490.669575,
+    "ast_hash": "61dc0012c973ae7dfba498465cb46fc2",
+    "semantic_hash": ""
+  },
+  "frontend/src/utils/reportCsv.js": {
+    "mtime": 1791557270.8942018,
+    "ast_hash": "981382df19c29ed8bf8e33739b732433",
     "semantic_hash": ""
   }
 }

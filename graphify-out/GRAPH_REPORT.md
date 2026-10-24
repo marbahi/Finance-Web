@@ -1,16 +1,16 @@
-# Graph Report - finance-monitor  (2026-09-19)
+# Graph Report - finance-monitor  (2026-10-09)
 
 ## Corpus Check
-- 93 files · ~34,764 words
+- 95 files · ~36,147 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 79 nodes · 83 edges · 15 communities (6 shown, 9 thin omitted)
+- 120 nodes · 134 edges · 14 communities (12 shown, 2 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `76896744`
+- Built from commit: `94497d9e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -26,22 +26,18 @@
 - @testing-library/jest-dom
 - @testing-library/react
 - @types/react
-- @types/react-dom
-- vite
-- @vitejs/plugin-react
-- vitest
 
 ## God Nodes (most connected - your core abstractions)
 1. `scripts` - 7 edges
-2. `Transactions()` - 5 edges
-3. `Pagination()` - 4 edges
-4. `usePagination()` - 3 edges
-5. `getMonthRange()` - 2 edges
-6. `getYearRange()` - 2 edges
-7. `formatRp()` - 2 edges
-8. `formatDate()` - 2 edges
-9. `lookupName()` - 2 edges
-10. `transform()` - 2 edges
+2. `Transactions()` - 6 edges
+3. `Reports()` - 5 edges
+4. `Wallets()` - 4 edges
+5. `buildReportCSV()` - 4 edges
+6. `Pagination()` - 4 edges
+7. `formatRp()` - 3 edges
+8. `Templates()` - 3 edges
+9. `usePagination()` - 3 edges
+10. `getDbUrl()` - 2 edges
 
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
@@ -49,11 +45,11 @@
 ## Import Cycles
 - None detected.
 
-## Communities (15 total, 9 thin omitted)
+## Communities (14 total, 2 thin omitted)
 
 ### Community 0 - "Transactions.jsx"
-Cohesion: 0.39
-Nodes (7): formatDate(), formatRp(), getMonthRange(), getYearRange(), today, todayStr, Transactions()
+Cohesion: 0.31
+Nodes (8): formatDate(), formatRp(), getMonthRange(), getYearRange(), today, todayStr, Transactions(), mocks
 
 ### Community 1 - "transactions.js"
 Cohesion: 0.40
@@ -72,22 +68,36 @@ Cohesion: 0.23
 Nodes (9): arrow(), CELL, EASE, paginate(), Pagination(), ROLL, slotFor(), STILL (+1 more)
 
 ### Community 6 - "devDependencies"
-Cohesion: 0.40
-Nodes (5): devDependencies, oxlint, @testing-library/user-event, oxlint, @testing-library/user-event
+Cohesion: 0.10
+Nodes (21): devDependencies, jsdom, oxlint, @testing-library/jest-dom, @testing-library/react, @testing-library/user-event, @types/react, @types/react-dom (+13 more)
+
+### Community 7 - "jsdom"
+Cohesion: 0.19
+Nodes (13): COLORS, CustomTooltip(), formatAxis(), formatRp(), isoDay(), MONTH_SHORT, Reports(), sumBy() (+5 more)
+
+### Community 8 - "@testing-library/jest-dom"
+Cohesion: 0.31
+Nodes (4): formatRp(), Wallets(), walletTypes, mockCtx
+
+### Community 9 - "@testing-library/react"
+Cohesion: 0.60
+Nodes (3): formatRp(), Templates(), mocks
 
 ## Knowledge Gaps
-- **36 isolated node(s):** `today`, `todayStr`, `router`, `TRANS_TYPES`, `name` (+31 more)
+- **43 isolated node(s):** `COLORS`, `MONTH_SHORT`, `today`, `todayStr`, `walletTypes` (+38 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `devDependencies` connect `devDependencies` to `package.json`, `jsdom`, `@testing-library/jest-dom`, `@testing-library/react`, `@types/react`, `@types/react-dom`, `vite`, `@vitejs/plugin-react`, `vitest`?**
-  _High betweenness centrality (0.253) - this node is a cross-community bridge._
+- **Why does `devDependencies` connect `devDependencies` to `package.json`?**
+  _High betweenness centrality (0.108) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.213) - this node is a cross-community bridge._
-- **What connects `today`, `todayStr`, `router` to the rest of the system?**
-  _36 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _High betweenness centrality (0.091) - this node is a cross-community bridge._
+- **What connects `COLORS`, `MONTH_SHORT`, `today` to the rest of the system?**
+  _43 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `dependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.11764705882352941 - nodes in this community are weakly interconnected._
+- **Should `devDependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
